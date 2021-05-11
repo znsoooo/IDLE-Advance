@@ -1,14 +1,60 @@
-import re, os
+import os
+import re
 import time
-from idlelib.config import idleConf
-from idlelib.editor import EditorWindow
-from idlelib.mainmenu import menudefs
+
 import tkinter as tk
 
-h = help
+from idlelib.config import idleConf
+from idlelib.mainmenu import menudefs
+from idlelib.pyshell import main, PyShellFileList, PyShellEditorWindow
+import idlelib.pyshell
 
 from pprint import pprint
 
+
+
+##################
+## About Cursor ##
+##################
+
+
+def Pos2Cur(s, pos):
+    ss = s[:pos].split('\n')
+    cur = '%d.%d'%(len(ss), len(ss[-1]))
+    return cur
+
+
+def Cur2Pos(s, cur):
+    ln, col = map(int, cur.split('.'))
+    ss = s.split('\n')[:ln]
+    ss[-1] = ss[-1][:col] # 如果不还原ss而直接计算前ln行+col,可能造成第1行的转换错误
+    pos = len('\n'.join(ss))
+    return pos
+
+
+def SelectFromCurrent(text, n):
+    text.mark_set('insert', 'current')
+    text.tag_remove('sel', '1.0', 'end')
+    text.tag_add('sel', 'current', 'current+%dc'%(n+1))
+
+
+def SelectLines(text, start, lines):
+    cur = '%d.0'%start
+    text.mark_set('insert', cur)
+    text.tag_remove('sel', '1.0', 'end')
+    text.tag_add('sel', cur, cur+'+%dl'%lines)
+
+
+def SelectSpan(text, span):
+    s = text.get('1.0', 'end')
+    c1, c2 = Pos2Cur(s, span[0]), Pos2Cur(s, span[1])
+    text.mark_set('insert', c1)
+    text.tag_remove('sel', '1.0', 'end')
+    text.tag_add('sel', c1, c2)
+    text.see(c1)
+
+
+#########
 
 
 class CursorHistory:
@@ -19,8 +65,9 @@ class CursorHistory:
 
 
     def Add(self, e):
-        # DOTO 当文本变化时平移历史记录
+        # TODO 当文本变化时平移历史记录
         # TODO 记录文件名+位置
+        # TODO 只记录行数
         cur = self.text.index('insert')
         if cur != self.history[self.pointer]:
             self.pointer += 1
@@ -98,12 +145,15 @@ class ReplaceBar(tk.Frame):
             s = s.lower()
             pat = pat.lower()
 
-        if self.wordvar.get():
-            pat = r'\b' + pat + r'\b'
-
         if not self.revar.get():
-            pat = pat # TODO 转义正则关键词
-            repl = repl
+            sp = '^$.*+?,\\()[]{}'
+            for c in sp:
+                pat  = pat.replace(c, '\\' + c)
+                repl = repl.replace(c, '\\' + c)
+                # TODO self test
+
+        if self.wordvar.get(): # \b在"去正则化"之后转换
+            pat = r'\b' + pat + r'\b'
 
         # high light matchs
         cnt = 0
@@ -121,8 +171,9 @@ class ReplaceBar(tk.Frame):
         self.tip.config(text=' Match: %d/%d'%(now, cnt))
 
         if matchs:
+            # TODO 光标不在匹配位置时点下一个会跳2条
             new = (now - 1 + move) % len(matchs)
-            SelectAndSee(self.text, matchs[new])
+            SelectSpan(self.text, matchs[new])
 
 
     def Prev(self):
@@ -159,50 +210,6 @@ def fixwordbreaks(root):
 # print(re.sub(rb'\w', b'', bytes(range(128))))
 
 
-
-##################
-## About Cursor ##
-##################
-
-
-def Pos2Cur(s, pos):
-    ss = s[:pos].split('\n')
-    cur = '%d.%d'%(len(ss), len(ss[-1]))
-    return cur
-
-
-def Cur2Pos(s, cur):
-    ln, col = map(int, cur.split('.'))
-    ss = s.split('\n')[:ln]
-    ss[-1] = ss[-1][:col] # 如果不还原ss而直接计算前ln行+col,可能造成第1行的转换错误
-    pos = len('\n'.join(ss))
-    return pos
-
-
-def SelectFromCurrent(text, n):
-    text.mark_set('insert', 'current')
-    text.tag_remove('sel', '1.0', 'end')
-    text.tag_add('sel', 'current', 'current+%dc'%(n+1))
-
-
-def SelectMultiLines(text, ln, rows):
-    cur = '%d.0'%ln
-    text.mark_set('insert', cur)
-    text.tag_remove('sel', '1.0', 'end')
-    text.tag_add('sel', cur, cur+'+%dl'%rows)
-
-
-def SelectAndSee(text, span):
-    s = text.get('1.0', 'end')
-    c1, c2 = Pos2Cur(s, span[0]), Pos2Cur(s, span[1])
-    text.mark_set('insert', c1)
-    text.tag_remove('sel', '1.0', 'end')
-    text.tag_add('sel', c1, c2)
-    text.see(c1)
-
-
-
-#########
 
 
 def FindKey(key='', root=r'C:\Users\lenovo\AppData\Local\Programs\Python\Python36\Lib\idlelib'):
@@ -244,16 +251,15 @@ def GetRecentChangedFiles():
 ##print('\n'.join(GetRecentChangedFiles()))
 
 
-def OnAction(e):
-    SaveCursor(text)
+def OnTest(e):
+    print(e)
+    print(type(e))
+    print(e.widget)
+    print(type(e.widget))
+
 
 def OnDoubleLeftRelease(e):
-    print(e)
-    SmartSelect(text)
-
-
-def OnLeftRelease(e):
-    CursorSave()
+    SmartSelect(e.widget)
 
 
 def SearchWords(text):
@@ -288,7 +294,7 @@ def SmartSelect(text):
             begin = ss[row] if empty else ss[row][:indent+1] # empty代表无穷缩进
             if begin.split('#')[0].strip() != '' or empty: # 起始时是empty则只选中一行
                 break
-        SelectMultiLines(text, ln, row)
+        SelectLines(text, ln, row)
 
     else:
         # TODO 智能选取引号内全部内容/智能选取括号内内容/选区不换行/连续选中空格
@@ -326,14 +332,13 @@ def SmartSelect(text):
             SelectFromCurrent(text, i)
 
         elif s[0] == '\n':
-            SelectMultiLines(text, ln, 1)
+            SelectLines(text, ln, 1)
 
         elif re.match('\W', s[0]):
             m = re.match('[^\w\n]+(\w+)?', s)
             i = m.end() - 1
             SelectFromCurrent(text, i)
 
-##help(tk.Tk.bind)
 
 mymenudef = ('advance', [
    ('Open Folder', '<<my-function>>'),
@@ -360,14 +365,22 @@ menudefs.append(mymenudef)
 
 
 
-
-
-
-
-class MyEditorWindow(EditorWindow):
-    def __init__(self, root):
-        super().__init__(root=root)
+class MyPyShellEditorWindow(PyShellEditorWindow):
+    def __init__(self, flist=None, filename=None, key=None, root=None):
+        super().__init__(flist, filename, key, root)
         ReplaceBar(self.text_frame, self.text).pack(fill='x', side='bottom')
+
+        text = self.text
+        text.insert('insert', open(__file__, encoding='u8').read())
+
+        ch = CursorHistory(text)
+        text.bind('<ButtonRelease-1>', ch.Add)
+        text.bind('<Alt-Left>',  lambda e: ch.Move(-1)) # TODO 兼容Alt+上下
+        text.bind('<Alt-Right>', lambda e: ch.Move( 1))
+
+        # text.bind('<MouseWheel>', print) # for test
+        text.bind('<F2>', OnTest)
+        text.bind('<Double-ButtonRelease-1>', OnDoubleLeftRelease)
 
 
     def createmenubar(self):
@@ -375,37 +388,49 @@ class MyEditorWindow(EditorWindow):
         super().createmenubar()
 
 
+class MyPyShellFileList(idlelib.pyshell.PyShellFileList):
+    EditorWindow = MyPyShellEditorWindow
 
 
+idlelib.pyshell.PyShellFileList = MyPyShellFileList
 
 
 if __name__ == '__main__':
-    root = tk.Tk()
-    root.withdraw()
+    # import idlexlib.extensionManager
+    # import idlexlib.idlexMain
+    # help(tk.Tk.bind)
 
-    import idlelib.searchengine as searchengine
-    from idlelib.searchbase import SearchDialogBase
-    from idlelib.replace import ReplaceDialog
+    import os
 
+    if 'main':
+        main()
 
-    fixwordbreaks(root)
-    edit = MyEditorWindow(root=root)
-    text = edit.text
+    else:
+        root = tk.Tk()
+        root.withdraw()
+        fixwordbreaks(root)
 
+        if 'use_flist':
+            idlelib.pyshell.use_subprocess = True # 什么用途?
+            flist = PyShellFileList(root)
+            edit = MyPyShellEditorWindow(flist)
 
-    ch = CursorHistory(text)
-    text.bind('<ButtonRelease-1>', ch.Add)
-    text.bind('<Alt-Left>',  lambda e: ch.Move(-1)) # TODO 兼容Alt+上下
-    text.bind('<Alt-Right>', lambda e: ch.Move( 1))
+        if not 'use_EditorWindow': # 代码已经移除
+            edit = MyEditorWindow(root=root)
 
-    text.bind('<Control-`>', OnAction)
-    # text.bind('<MouseWheel>', print) # for test
-    text.bind('<Double-ButtonRelease-1>', OnDoubleLeftRelease)
+        text = edit.text
+        text.insert('insert', open(__file__, encoding='u8').read())
+        print(text.tag_names())
 
-    text.insert('insert', open(__file__, encoding='u8').read())
+        ch = CursorHistory(text)
+        text.bind('<ButtonRelease-1>', ch.Add)
+        text.bind('<Alt-Left>',  lambda e: ch.Move(-1)) # TODO 兼容Alt+上下
+        text.bind('<Alt-Right>', lambda e: ch.Move( 1))
 
-    print(text.tag_names())
+        text.bind('<MouseWheel>', print) # for test
+        text.bind('<Control-`>', OnAction)
+        text.bind('<Double-ButtonRelease-1>', OnDoubleLeftRelease)
 
-    root.mainloop()
+        root.mainloop()
 
 
