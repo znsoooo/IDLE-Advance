@@ -1,6 +1,6 @@
+
 import os
 import re
-import time
 
 import tkinter as tk
 
@@ -8,6 +8,7 @@ from idlelib.config import idleConf
 from idlelib.mainmenu import menudefs
 from idlelib.pyshell import main, PyShellFileList, PyShellEditorWindow
 import idlelib.pyshell
+import idlelib.editor
 
 from pprint import pprint
 
@@ -74,13 +75,36 @@ class CursorHistory:
             self.history = self.history[:self.pointer] + [cur]
 
 
-    def Move(self, n):
+    def Move(self, text, n):
         if -1 < self.pointer + n < len(self.history):
             self.pointer += n
             text.see(self.history[self.pointer])
             tag = '-1c' if n > 0 else '+1c' # TODO 当用快捷键操作时会多运动一个字符
             text.mark_set('insert', self.history[self.pointer] + tag)
 
+
+def PrepFind(s, pat, repl, isre=False, case=True, word=False):
+    if not isre: # TODO self test
+        sp = '^$.*+?,\\|()[]{}'
+        for c in sp:
+            pat = pat.replace(c, '\\' + c)
+        repl = repl.replace('\\', '\\\\')
+
+    if not case:
+        s = s.lower()
+        pat = pat.lower()
+
+    if word:  # "\b"在"去正则化"之后转换
+        pat = r'\b' + pat + r'\b'
+
+    return s, pat, repl
+    # return (m.span() for m in re.finditer(pat, s))
+
+
+s = bytes(range(128)).decode()
+s1, pat, repl = PrepFind('', s, s)
+print('PrepFind Test Patt:', s == re.sub(pat, '', s))
+print('PrepFind Test Repl:', s == re.sub('1', repl, '1'))
 
 
 class ReplaceBar(tk.Frame):
@@ -141,19 +165,7 @@ class ReplaceBar(tk.Frame):
         repl = self.replvar.get()
         back = self.backvar.get()
 
-        if not self.casevar.get():
-            s = s.lower()
-            pat = pat.lower()
-
-        if not self.revar.get():
-            sp = '^$.*+?,\\()[]{}'
-            for c in sp:
-                pat  = pat.replace(c, '\\' + c)
-                repl = repl.replace(c, '\\' + c)
-                # TODO self test
-
-        if self.wordvar.get(): # \b在"去正则化"之后转换
-            pat = r'\b' + pat + r'\b'
+        s, pat, repl = PrepFind(s, pat, repl, self.revar.get(), self.casevar.get(), self.wordvar.get())
 
         # high light matchs
         cnt = 0
@@ -200,19 +212,24 @@ def fixwordbreaks(root):
     # On Windows, tcl/tk breaks 'words' only on spaces, as in Command Prompt.
     # We want Motif style everywhere. See #21474, msg218992 and followup.
     tk = root.tk
-##    tk.call('tcl_wordBreakAfter', 'a b', 0) # make sure word.tcl is loaded
+    # tk.call('tcl_wordBreakAfter', 'a b', 0) # make sure word.tcl is loaded
     s = r',=\(\)\[\]\{\}'
-##    tk.call('set', 'tcl_wordchars', '[%s]'%s)
-##    tk.call('set', 'tcl_nonwordchars', '[^%s]'%s) # lsx: Crtl+Del will del until end with nonwordchars
-    tk.call('set', 'tcl_wordchars', '\w')
-    tk.call('set', 'tcl_nonwordchars', '\W')
+    # tk.call('set', 'tcl_wordchars', '[%s]'%s)
+    # tk.call('set', 'tcl_nonwordchars', '[^%s]'%s) # lsx: Crtl+Del will del until end with nonwordchars
+    # tk.call('set', 'tcl_wordchars', '\w')
+    # tk.call('set', 'tcl_nonwordchars', '\W')
+    # tk.call('set', 'tcl_wordchars', '.')
+    # tk.call('set', 'tcl_nonwordchars', '\n')
+    tk.call('set', 'tcl_wordchars', '.')
+    tk.call('set', 'tcl_nonwordchars', '')
 
 # print(re.sub(rb'\w', b'', bytes(range(128))))
 
 
 
-
-def FindKey(key='', root=r'C:\Users\lenovo\AppData\Local\Programs\Python\Python36\Lib\idlelib'):
+import idlelib
+ROOT_IDLE = os.path.dirname(idlelib.__file__)
+def FindKey(key='', root=ROOT_IDLE):
     for root, folders, files in os.walk(root):
         for file in files:
             if file.endswith('.py'):
@@ -230,7 +247,7 @@ def FindKey(key='', root=r'C:\Users\lenovo\AppData\Local\Programs\Python\Python3
 
 
 
-def PrintTags():
+def PrintTags(text):
     print(text.tag_names())
     for name in text.tag_names():
         print(name, text.tag_ranges(name))
@@ -262,23 +279,6 @@ def OnDoubleLeftRelease(e):
     SmartSelect(e.widget)
 
 
-def SearchWords(text):
-    # TODO 滚轮控制在多个结果中移动查看，如果选中不是完整单词是否仍进行匹配？
-    # TODO 返回当前选中的匹配序号
-    # TODO 换个颜色（不是hit）（参考：notepad++是深绿和浅绿）
-    # TODO 匹配空格时速度很慢
-    text.tag_remove('hit', '1.0', 'end')
-    cnt = 0
-    if text.tag_ranges('sel'):
-        s  = text.get('1.0', 'end')
-        s1 = text.selection_get()
-        for m in re.finditer(r'\b%s\b'%s1, s): # TODO 当s1中存在正则语法时会错误
-            cnt += 1
-            p1, p2 = m.span()
-            text.tag_add('hit', Pos2Cur(s, p1), Pos2Cur(s, p2))
-    return cnt
-
-
 def SmartSelect(text):
     # TODO 遇到注释文本的问题
     cur = text.index('current') # 当用insert时光标位置为自动选区的最开始
@@ -295,6 +295,20 @@ def SmartSelect(text):
             if begin.split('#')[0].strip() != '' or empty: # 起始时是empty则只选中一行
                 break
         SelectLines(text, ln, row)
+
+
+    elif re.match(r'\w', line[col]):
+        span = [m.span() for m in re.finditer(r'\w+', line) if m.start() <= col <= m.end()][0]
+        word = line[span[0]:span[1]]
+
+        # TODO 换个颜色（不是hit）（参考：notepad++是深绿和浅绿）
+        # TODO 选中后取消
+        # TODO 一行中第一个word如果是一个字符无法选中（命中另一个规则）
+        text.tag_remove('hit', '1.0', 'end')
+        s  = text.get('1.0', 'end')
+        for m in re.finditer(r'\b%s\b'%word, s):
+            p1, p2 = m.span()
+            text.tag_add('hit', Pos2Cur(s, p1), Pos2Cur(s, p2))
 
     else:
         # TODO 智能选取引号内全部内容/智能选取括号内内容/选区不换行/连续选中空格
@@ -364,23 +378,30 @@ mymenudef = ('advance', [
 menudefs.append(mymenudef)
 
 
-
 class MyPyShellEditorWindow(PyShellEditorWindow):
     def __init__(self, flist=None, filename=None, key=None, root=None):
         super().__init__(flist, filename, key, root)
         ReplaceBar(self.text_frame, self.text).pack(fill='x', side='bottom')
 
         text = self.text
+        hbar = tk.Scrollbar(self.text_frame, orient='h')
+        hbar['command'] = text.xview
+        hbar.pack(fill='x', side='bottom')
+        text['xscrollcommand'] = hbar.set
+
         text.insert('insert', open(__file__, encoding='u8').read())
 
         ch = CursorHistory(text)
         text.bind('<ButtonRelease-1>', ch.Add)
-        text.bind('<Alt-Left>',  lambda e: ch.Move(-1)) # TODO 兼容Alt+上下
-        text.bind('<Alt-Right>', lambda e: ch.Move( 1))
+        text.bind('<Alt-Left>',  lambda e: ch.Move(e.widget, -1)) # TODO 兼容Alt+上下
+        text.bind('<Alt-Right>', lambda e: ch.Move(e.widget,  1))
 
         # text.bind('<MouseWheel>', print) # for test
         text.bind('<F2>', OnTest)
+        text.bind('<Control-`>', OnTest)
         text.bind('<Double-ButtonRelease-1>', OnDoubleLeftRelease)
+
+        text.bind('<<my-function>>', lambda e: print(12, e))
 
 
     def createmenubar(self):
@@ -392,7 +413,7 @@ class MyPyShellFileList(idlelib.pyshell.PyShellFileList):
     EditorWindow = MyPyShellEditorWindow
 
 
-idlelib.pyshell.PyShellFileList = MyPyShellFileList
+
 
 
 if __name__ == '__main__':
@@ -402,7 +423,8 @@ if __name__ == '__main__':
 
     import os
 
-    if 'main':
+    if not 'main':
+        idlelib.pyshell.PyShellFileList = MyPyShellFileList
         main()
 
     else:
@@ -415,21 +437,7 @@ if __name__ == '__main__':
             flist = PyShellFileList(root)
             edit = MyPyShellEditorWindow(flist)
 
-        if not 'use_EditorWindow': # 代码已经移除
-            edit = MyEditorWindow(root=root)
-
-        text = edit.text
-        text.insert('insert', open(__file__, encoding='u8').read())
-        print(text.tag_names())
-
-        ch = CursorHistory(text)
-        text.bind('<ButtonRelease-1>', ch.Add)
-        text.bind('<Alt-Left>',  lambda e: ch.Move(-1)) # TODO 兼容Alt+上下
-        text.bind('<Alt-Right>', lambda e: ch.Move( 1))
-
-        text.bind('<MouseWheel>', print) # for test
-        text.bind('<Control-`>', OnAction)
-        text.bind('<Double-ButtonRelease-1>', OnDoubleLeftRelease)
+        print(edit.text.tag_names())
 
         root.mainloop()
 
