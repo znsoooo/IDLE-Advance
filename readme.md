@@ -1,8 +1,8 @@
 # IDLE-Advance
-- Platform: > py36
+- Platform: > Python 3.6 / Windows
 - Author: Lishixian
-- Email: lsx7@sina.com
 - QQ: 11313213
+- Email: lsx7@sina.com
 - Website: github.com/znsoooo/IDLE-Advance
 
 ## 笔者的话：
