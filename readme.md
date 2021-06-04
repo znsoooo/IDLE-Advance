@@ -1,15 +1,15 @@
 # IDLE增强计划（Advance）
-- Author: Lishixian
-- QQ: 11313213
-- Email: lsx7@sina.com
-- Website: github.com/znsoooo/IDLE-Advance
+- __Author:__ Lishixian
+- __QQ:__ 11313213
+- __Email:__ lsx7@sina.com
+- __Website:__ github.com/znsoooo/IDLE-Advance
 
 
 ## 运行方法
-- 平台：Windows/Python3.6 （其他平台未测试，但是计划支持Linux/Windows和py3.4以上的版本）
-- 依赖：可选择地安装windnd库，增加拖拽脚本文件到窗口即可打开的快捷操作，不安装此依赖也不影响整体运行
-- 使用：用python启动idlexx.py文件，随后在此界面上操作打开其他的脚本文件即可
-- 功能：见后文todolist，实现的功能已经标记，剩余部分争取在1年之内完成
+- __平台：__ Windows/Python3.6 （其他平台未测试，但是计划支持Linux/Windows和py3.4以上的版本）
+- __依赖：__ 可选择地安装windnd库，增加拖拽脚本文件到窗口即可打开的快捷操作，不安装此依赖也不影响整体运行
+- __使用：__ 用python启动idlexx.py文件，随后在此界面上操作打开其他的脚本文件即可
+- __功能：__ 见后文todolist，实现的功能已经标记，剩余部分争取在1年之内完成
 
 
 ## Todolist
