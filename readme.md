@@ -55,7 +55,7 @@
 ## 关于项目
 
 ### 笔者的话
-- 本项目（IDLE-Advance）和另一个IDLEX的开发项目（http://idlex.sourceforge.net）没有关联！
+- 本项目（IDLE-Advance）和另一个IDLEX的开发项目（ http://idlex.sourceforge.net ）没有关联！
 - 由于该项目停止维护已久（2012年），并且该项目使用者的主要功能提升是增加了可以显示代码行号。
 - 但是我认为IDLE本来在窗口的右下角就有显示行号，甚至在新版的python中，可选的显示行号功能直接增加为了新的feature（py3.9）。
 - 所以笔者不在前人的轮子基础上继续修改，而是选择重新造一个轮子。
