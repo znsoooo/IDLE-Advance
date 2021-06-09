@@ -9,11 +9,15 @@ from idlelib.mainmenu import menudefs
 from idlelib.pyshell import main, PyShellFileList, PyShellEditorWindow
 import idlelib.pyshell
 import idlelib.editor
+from idlelib import window
 
 from pprint import pprint
 
 
 def OnTest(e):
+    from idlelib.textview import ViewWindow
+    dlg = ViewWindow(e.widget, 'title', 'text')
+
     print(e)
     print(type(e))
     print(e.widget)
@@ -62,7 +66,6 @@ def GetRecentChangedFiles():
 
 
 
-
 def SmartPairing(e):
     # TODO 第一次输入右括号时移动光标但不键入
     # TODO 删除左括号时删除右括号（如果有的话）
@@ -78,44 +81,42 @@ def SmartPairing(e):
     text.mark_gravity('insert', 'right')
 
 
-
-def RunSelected(e):
-    ss = e.widget.get('sel.first', 'sel.last')
-    if ss[-1] != '\n':
-        ss += '\n' # 防止选中段尾空行提示信息多出一行引起困惑
-    print('Run Selected Code with %d Lines.'%(ss.count('\n'))) # TODO 显示在shell中
-    if ss.startswith(' '):
-        ss = 'if 1:\n' + ss
-    ret = exec(ss) # TODO 运行报错显示在shell中
-    # TODO 无选中时运行错误
-
-
 class FileManager(tk.Menu):
     def __init__(self, root, text, io):
         tk.Menu.__init__(self, root, tearoff=0)
-        self.add_command(label='Insert Filename',  command=lambda: text.insert('insert', "r'%s'"%io.filename))
-        self.add_command(label='Open in Explorer', command=lambda: subprocess.Popen('explorer %s'%os.path.dirname(io.filename)))
-        self.add_command(label='Copy Filename',    command=lambda: (root.clipboard_clear(), root.clipboard_append(io.filename)))
+        n = io.filename
+        text_insert   = lambda s: (lambda: text.insert('insert', s))
+        clipboard_set = lambda s: (lambda: (root.clipboard_clear(), root.clipboard_append(s)))
+
+        self.add_command(label='Copy Fullname', command=clipboard_set(n))
+        self.add_command(label='Copy Filename', command=clipboard_set(os.path.basename(n)))
+        self.add_command(label='Copy Dirname',  command=clipboard_set(os.path.dirname(n)))
+        self.add_separator()
+        self.add_command(label='Insert Fullname', command=text_insert("r'%s'"%n))
+        self.add_command(label='Insert Filename', command=text_insert("'%s'"%os.path.basename(n)))
+        self.add_command(label='Insert Dirname',  command=text_insert("r'%s'"%os.path.dirname(n)))
+        self.add_separator()
+        self.add_command(label='Open in Explorer', command=lambda: subprocess.Popen('explorer %s'%os.path.dirname(n)))
         self.add_command(label='Open in CMD',      command=lambda: os.system('start'))
         # self.add_command(label='Run in CMD',       command=lambda: os.system('start "%s"'%io.filename)) # TODO
+
+        # TODO rename, reload, copy
+
+
 
 
 mymenudef = ('advance', [
     ('Back', '<<my-function>>'),
     ('Forward', '<<my-function>>'),
     None,
-    # ('History Clipboard', '<<my-function>>'),
+    None,
     ('Recent Changed Files', '<<my-function>>'),
     None,
     ('Reload File', '<<my-function>>'),
     None,
-    ('Open Folder', '<<my-function>>'),
-    ('Open CMD', '<<my-function>>'),
-    ('Copy Fullname', '<<my-function>>'),
+    ('Run Selected', '<<run-selected>>'),
     None,
-    ('Run Selected', '<<my-function>>'),
-    None,
-    ('Compare to', '<<my-function>>'), # TODO 支持选择py或全部格式文件
+    ('Compare to File', '<<my-function>>'), # TODO 支持选择py或全部格式文件
     None,
     ('!Replace Bar', '<<my-function>>'),
     ])
@@ -123,9 +124,13 @@ mymenudef = ('advance', [
 menudefs.append(mymenudef)
 
 
+
+
+PyShellEditorWindow.menu_specs.append(('advance', 'Advance')) # 如果写在方法里会导致多次运行时不断追加菜单
+
 class MyPyShellEditorWindow(PyShellEditorWindow):
     def __init__(self, flist=None, filename=None, key=None, root=None):
-        super().__init__(flist, filename, key, root)
+        PyShellEditorWindow.__init__(self, flist, filename, key, root)
         text = self.text
 
         FixTextSelect(self.root)
@@ -145,24 +150,30 @@ class MyPyShellEditorWindow(PyShellEditorWindow):
         text.bind('<Alt-Left>',  lambda e: ch.Move(e.widget, -1)) # TODO 兼容Alt+上下
         text.bind('<Alt-Right>', lambda e: ch.Move(e.widget,  1))
 
+
         for c in '([{\'"':
             text.bind('<%s>'%c, SmartPairing) # '<KeyRelease-%s>'%c
 
         text.bind('<F6>', self.RunSelected)
+        text.bind('<F2>', OnTest)
         text.bind('<Double-Button-1>', SmartSelect)
         self.text_frame.bind('<FocusIn>', self.ReloadFile)
 
         text.bind('<<my-function>>', lambda e: print('myfun', e))
 
-        self.recent_clipboard_data = []
-        self.recent_clipboard = tk.Menu(self.menubar, tearoff=0)
-        self.menudict['advance'].insert_cascade(3, label='Paste from History', menu=self.recent_clipboard)
-
+        # 历史剪切板功能
+        self.menu_clip = RecentClipboard(self)
         self.make_rmenu() # make "self.rmenu"
-        self.rmenu.insert_cascade(3, label='History', menu=self.recent_clipboard)
+        self.rmenu.insert_cascade(3, label='History', menu=self.menu_clip)
+        self.menudict['advance'].insert_cascade(3, label='Paste from History', menu=self.menu_clip)
 
-        filemanager = FileManager(self.root, self.text, self.io)
-        self.menudict['advance'].insert_cascade(4, label='File Manager', menu=filemanager)
+        # 窗口操作
+        menu_windows = WindowManager(self)
+        self.menudict['advance'].insert_cascade(3, label='Window Manager', menu=menu_windows)
+
+        # 文件操作
+        menu_files = FileManager(self.root, self.text, self.io)
+        self.menudict['advance'].insert_cascade(3, label='File Manager', menu=menu_files)
 
 
         try:
@@ -172,41 +183,14 @@ class MyPyShellEditorWindow(PyShellEditorWindow):
             pass
 
 
-    def createmenubar(self):
-        if ('advance', 'Advance') not in self.menu_specs: # TODO 没有此行多次打开脚本后会不断追加菜单，看看有没有更好的表达方式
-            self.menu_specs.append(('advance', 'Advance'))
-        super().createmenubar()
-
-
     def copy(self, event):
-        # super().copy(event) # TODO useless?
-        s = self.text.get('sel.first', 'sel.last')
-        if s: # 非空字符串
-            self.recent_clipboard_add(s)
+        super().copy(event)
+        self.menu_clip.Add()
 
+    def _close(self):
+        super()._close()
+        # raise # TODO 是否还有别的方法阻止清空剪切
 
-    def recent_clipboard_add(self, s):
-        if s in self.recent_clipboard_data:
-            self.recent_clipboard_data.remove(s)
-        self.recent_clipboard_data.insert(0, s)
-
-        menu = self.recent_clipboard
-        menu.delete(0, 'end')
-        for i, s in enumerate(self.recent_clipboard_data):
-            callback = self.recent_clipboard_callback(s)
-            s1 = s.replace('\n', '\\n')
-            if len(s1) > 45:
-                s1 = s1[:20] + ' ... ' + s1[-20:]
-            menu.add_command(label='len: %d, %s'%(len(s), s1), command=callback)
-
-
-    def recent_clipboard_callback(self, s):
-        def f():
-            self.root.clipboard_clear()
-            self.root.clipboard_append(s)
-            self.text.event_generate('<<Paste>>')
-            self.recent_clipboard_add(s)
-        return f
 
 
     def OpenFile(self, files):
@@ -217,6 +201,9 @@ class MyPyShellEditorWindow(PyShellEditorWindow):
                 # TODO 由于滚动条存在导致有时候拖拽加载会闪退，增加下面两行可以避免
                 edit.text.tag_add("sel", "insert", "insert+1c")
                 edit.text.tag_remove("sel", "1.0", "end")
+
+                # TODO 是否可以
+                # self.io.open(editFile=file)
 
 
     def ReloadFile(self, e):
@@ -242,6 +229,8 @@ class MyPyShellFileList(idlelib.pyshell.PyShellFileList):
 
 from .ReplaceBar import ReplaceBar
 from .SmartSelect import SmartSelect, FixTextSelect
+from .WindowManager import WindowManager
+from .RecentClipboard import RecentClipboard
 
 
 def run(filename=__file__):
