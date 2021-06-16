@@ -1,6 +1,10 @@
 from idlexx import test
 
+# test.FindKey(r'.*<<.*>>.*')
+# test.FindKey(r'.*\.(open|_close|save).*')
+
 # test.FindKey(r'.*recent_file.*')
+
 
 # test.FindKey(r'FocusIn')
 # test.FindKey(r'FOCUSIN')

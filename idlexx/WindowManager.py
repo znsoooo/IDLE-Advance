@@ -19,7 +19,7 @@ class WindowManager(tk.Menu):
         for n, file1 in enumerate(rf_list):
             if os.path.samefile(file1, filename):
                 now = n
-            # 大小写斜杠不同导致不同字符串但是可能是同一个文件
+            # 大小写斜杠不同导致不同字符串但是可能是同一个文件 # TODO os.path.normcase(...) Ref: idlelib.filelist.open
             status = any(os.path.samefile(file1, file2) for file2 in op_list)
             if status:
                 opened.append(file1)
@@ -44,7 +44,7 @@ class WindowManager(tk.Menu):
 
     def OnClose(self, *args): # TODO 多次恢复之后检查关闭后激活下一个的循环顺序问题
         self.OnPrev()
-        self.parent._close()
+        self.parent._close() # TODO 没有保存!! event: '<<close-all-windows>>', '<<close-window>>'
 
     def OnCloseAll(self, *args):
         for win in list(self.parent.top.instance_dict): # list the dict avoid dict changed during run.
