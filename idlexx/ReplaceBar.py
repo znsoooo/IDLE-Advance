@@ -66,6 +66,8 @@ class ReplaceBar(tk.Frame):
         tk.Button(self, relief='groove', text='Replace', command=self.Replace).pack(side='left')
         tk.Button(self, relief='groove', text='Replace All', command=self.ReplaceAll).pack(side='left')
 
+        self.pack(fill='x', side='bottom')
+
 
     def Setting(self, *args):
         self.Find()

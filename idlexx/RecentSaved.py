@@ -9,7 +9,7 @@ import os
 import csv
 from idlelib.config import idleConf
 
-rc_path = os.path.join(idleConf.userdir, 'recent-closed.lst')
+rc_path = os.path.join(idleConf.userdir, 'recent-saved.lst')
 if not os.path.exists(rc_path):
     open(rc_path, 'w').close()
 
@@ -49,7 +49,7 @@ def Update(file, cur, save=True):
     SetList(data)
 
 
-def OnOpen(text, file):
+def ReloadCursor(text, file):
     data = GetList()
     cur = FindInData(data, file)[1]
     text.mark_set('insert', cur)
@@ -58,6 +58,31 @@ def OnOpen(text, file):
     text.tag_add("sel", "insert linestart", "insert linestart+1l")
 
 
-def OnSave(text, file, save=True):
+def SaveCursor(text, file, save=True):
     cur = text.index('insert')
     Update(file, cur, save)
+
+
+class RecentSaved:
+    def __init__(self, parent):
+        self.parent = parent
+
+    def OnOpen(self):
+        ReloadCursor(self.parent.text, self.parent.io.filename)
+
+    def OnSave(self):
+        SaveCursor(self.parent.text, self.parent.io.filename)
+
+    def OnClose(self):
+        SaveCursor(self.parent.text, self.parent.io.filename, False)
+
+
+# TODO 最近保存文件列表（排除已打开文件）
+def GetRecentChangedFiles():
+    # TODO 查看修改日期我之前是怎么写的？
+    rf_path = os.path.join(idleConf.userdir, 'recent-files.lst')
+    with open(rf_path, 'r', encoding='u8') as f:
+        rf_list = f.read().splitlines()
+    rf_list.sort(key=lambda p: os.stat(p).st_mtime if os.path.isfile(p) else 0, reverse=True)
+    return rf_list
+
