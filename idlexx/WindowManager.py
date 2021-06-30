@@ -58,7 +58,6 @@ class WindowManager(tk.Menu):
         self.add_separator()
         self.add_command(label='Close Window', command=self.OnClose)
         self.add_command(label='Close All Windows', command=self.OnCloseAll)
-        # TODO 增加按修改时间排序的历史记录
 
     def Binding(self):
         text = self.parent.text

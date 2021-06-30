@@ -25,10 +25,18 @@ class RunSelected(tk.Menu):
         # TODO 报错位置和真实行号对应
 
     def MakeMenu(self, pos):
+        params = [( 1, 'Run from Cursor'),
+                  (-1, 'Run to Cursor'),
+                  ( 0, 'Run Selected')]
+
+        self.add_command(label='Run from Cursor', command=lambda: self.Run(1))
+        self.add_command(label='Run to Cursor', command=lambda: self.Run(-1))
+        self.add_command(label='Run Selected', command=lambda: self.Run(0))
+
         rmenu = self.parent.rmenu
-        rmenu.insert_cascade(pos, label='Run from Cursor', command=lambda: self.Run(1))
-        rmenu.insert_cascade(pos, label='Run to Cursor', command=lambda: self.Run(-1))
-        rmenu.insert_cascade(pos, label='Run Selected', command=lambda: self.Run(0))
+        rmenu.insert_command(pos, label='Run from Cursor', command=lambda: self.Run(1))
+        rmenu.insert_command(pos, label='Run to Cursor', command=lambda: self.Run(-1))
+        rmenu.insert_command(pos, label='Run Selected', command=lambda: self.Run(0))
         rmenu.insert_separator(pos)
 
     def Binding(self):

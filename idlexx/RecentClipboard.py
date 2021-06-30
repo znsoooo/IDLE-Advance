@@ -1,3 +1,5 @@
+# TODO 不能在多个IDLE中共享
+
 import tkinter as tk
 
 class RecentClipboard(tk.Menu):

@@ -3,7 +3,10 @@ from tkinter.messagebox import askyesno
 
 
 def mtime(file):
-    return str(int(os.stat(file).st_mtime * 1e7))  # TODO 查看修改日期我之前是怎么写的？
+    if file:
+        return str(int(os.stat(file).st_mtime * 1e7))  # TODO 查看修改日期我之前是怎么写的？
+    else:
+        return 0
 
 
 class Reloader:

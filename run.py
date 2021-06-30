@@ -1,6 +1,7 @@
 from idlexx import test
 
-test.FindKey(r'.*<<find-again>>.*')
+
+# test.FindKey(r'.*<<find-again>>.*')
 # test.FindKey(r'.*<<.*>>.*')
 # test.FindKey(r'.*\.(open|_close|save).*')
 
@@ -20,4 +21,6 @@ test.FindKey(r'.*<<find-again>>.*')
 import tkinter as tk
 # help(tk.Tk.bind)
 
-import idlexx.run
+from idlexx import run
+
+run()

@@ -3,7 +3,7 @@ import os
 import tkinter as tk
 
 from idlelib.mainmenu import menudefs
-from idlelib.pyshell import main, PyShellFileList, PyShellEditorWindow
+from idlelib.pyshell import main, PyShellFileList, PyShellEditorWindow, PyShell
 import idlelib.pyshell
 
 import idlelib.editor
@@ -17,7 +17,7 @@ from .RunSelected import RunSelected
 from .CursorHistory import CursorHistory
 from .FileManager import FileManager
 
-from .RecentSaved import RecentSaved
+from .RecentSaved import RecentSaved, RecentClosed
 from .ReloadFile import Reloader
 
 
@@ -59,15 +59,7 @@ mymenudef = ('advance', [
     ('Forward', '<<my-function>>'),
     None,
     None,
-    ('Recent Changed Files', '<<my-function>>'),
-    None,
-    ('Reload File', '<<my-function>>'),
-    None,
-    ('Run Selected', '<<run-selected>>'),
-    None,
     ('Compare to File', '<<compare-file>>'),
-    None,
-    ('!Replace Bar', '<<my-function>>'),
     ])
 
 menudefs.append(mymenudef)
@@ -109,13 +101,18 @@ class MyPyShellEditorWindow(PyShellEditorWindow):
         menu_files = FileManager(self.root, self.text, self.io)
         self.menudict['advance'].insert_cascade(3, label='File Manager', menu=menu_files)
 
-        # 运行选中
-        RunSelected(self) # TODO 添加到顶层菜单
-
         # 位置记录
         self.menu_recorder = RecentSaved(self)
         self.menu_recorder.OnOpen()
         self.text.bind("<<save-window>>", self.OnSave)
+
+        # 最近保存
+        self.menu_rc = RecentClosed(self)
+        self.menudict['advance'].insert_cascade(3, label='Recent Edit Files', menu=self.menu_rc)
+
+        # 运行选中
+        menu_runner = RunSelected(self) # TODO 添加到顶层菜单
+        self.menudict['advance'].insert_cascade(3, label='Run Selected', menu=menu_runner)
 
         # 重载文件
         self.reloader = Reloader(self)
@@ -127,6 +124,12 @@ class MyPyShellEditorWindow(PyShellEditorWindow):
         except:
             pass
 
+        text.bind('<F2>', self.Test)
+
+
+    def Test(self, e):
+        print('editor ontest')
+        print(self.text.tag_names())
 
     def copy(self, event):
         super().copy(event)
@@ -140,7 +143,7 @@ class MyPyShellEditorWindow(PyShellEditorWindow):
     def close(self):
         # "<<close-window>>"事件不命中点击窗口关闭事件
         print('handle with edit close:', self.io.filename)
-        self.menu_recorder.OnSave()
+        self.menu_recorder.OnClose()
         super().close()
 
     def OnSearchForward(self, e):
@@ -158,6 +161,7 @@ class MyPyShellEditorWindow(PyShellEditorWindow):
         self.io.save(e) # TODO 如果文件未修改则不备份、关闭前备份、关闭未保存备份、定时器备份
         self.io.writefile(UniqueFile(self.io.filename))
         self.menu_recorder.OnSave()
+        self.menu_rc.Update()
         self.reloader.Refresh()
 
     def OnCompareFile(self, e):
@@ -179,6 +183,20 @@ class MyPyShellEditorWindow(PyShellEditorWindow):
                 # self.io.open(editFile=file)
 
 
+class MyPyShell(PyShell):
+    def __init__(self, flist=None):
+        PyShell.__init__(self, flist)
+        self.text.bind('<F2>', self.Test)
+
+    def Test(self, e):
+        print('shell ontest')
+        print(self.text.tag_names())
+        for name in self.text.tag_names():
+            print(name, self.text.tag_ranges(name))
+
+
+
+idlelib.pyshell.PyShell = MyPyShell
 
 
 class MyPyShellFileList(PyShellFileList):
@@ -205,4 +223,13 @@ def __recent_file_callback(self, file_name):
 # 打开文件并定位位置（恢复打开）
 outwin.py:
 self.flist.gotofileline(filename, lineno)
+'''
+
+# TODO 当不在instance_dict中将不会刷新（新启动的idle线程）
+'''
+def update_recent_files_list(self, new_file=None):
+    ...
+    # for each edit window instance, construct the recent files menu
+    for instance in self.top.instance_dict:
+        menu = instance.recent_files_menu
 '''

@@ -1,12 +1,6 @@
-'''
-File Format:
-mtime, cursor, filename
-'''
-
-# TODO 最后修改日期是否还用用途？顺序替代？
-
 import os
 import csv
+import tkinter as tk
 from idlelib.config import idleConf
 
 rc_path = os.path.join(idleConf.userdir, 'recent-saved.lst')
@@ -14,53 +8,36 @@ if not os.path.exists(rc_path):
     open(rc_path, 'w').close()
 
 
-def mtime(file):
-    return str(int(os.stat(file).st_mtime * 1e7)) # TODO 查看修改日期我之前是怎么写的？
-
-
-def GetList():
+def ReadData():
     with open(rc_path, encoding='u8', newline='') as f:
         data = list(csv.reader(f))
     return data
 
 
-def SetList(data): # TODO 位置标记换成冒号
-    data.sort()
+def SaveData(data):
     with open(rc_path, 'w', encoding='u8', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(data)
-    return data
 
 
-def FindInData(data, file): # TODO 区分第一次打开和打开记录为1.0
-    for row in data:
-        if file == row[2]:
-            return row
-    data.append(['0', '1.0', file]) # change in place
-    return data[-1]
+def FindInData(data, file):
+    for n, (cur, file2) in enumerate(data):
+        if file == file2:
+            return n, cur.replace(':', '.')
 
 
 def Update(file, cur, save=True):
-    data = GetList()
-    row = FindInData(data, file) # <data> maybe change in place
-    if save:
-        row[0] = mtime(file)
-    row[1] = cur
-    SetList(data)
-
-
-def ReloadCursor(text, file):
-    data = GetList()
-    cur = FindInData(data, file)[1]
-    text.mark_set('insert', cur)
-    text.see(cur)
-    text.tag_remove("sel", "1.0", "end")
-    text.tag_add("sel", "insert linestart", "insert linestart+1l")
-
-
-def SaveCursor(text, file, save=True):
-    cur = text.index('insert')
-    Update(file, cur, save)
+    cur = cur.replace('.', ':')
+    data = ReadData()
+    ret = FindInData(data, file)
+    if ret:
+        n = ret[0]
+        data[n][0] = cur
+        if save:
+            data.insert(0, data.pop(n)) # move to first
+    else:
+        data.insert(0, [cur, file])
+    SaveData(data)
 
 
 class RecentSaved:
@@ -68,21 +45,51 @@ class RecentSaved:
         self.parent = parent
 
     def OnOpen(self):
-        ReloadCursor(self.parent.text, self.parent.io.filename)
+        if not self.parent.io.filename:
+            return
+        data = ReadData()
+        ret = FindInData(data, self.parent.io.filename)
+        if ret:
+            cur = ret[1]
+            text = self.parent.text
+            text.mark_set('insert', cur)
+            text.see(cur)
+            text.tag_remove("sel", "1.0", "end")
+            text.tag_add("sel", "insert linestart", "insert linestart+1l")
+        else:
+            data.insert(0, ['1:0', self.parent.io.filename])
+            SaveData(data)
 
-    def OnSave(self):
-        SaveCursor(self.parent.text, self.parent.io.filename)
+    def OnSave(self, save=True):
+        if not self.parent.io.filename:
+            return
+        cur = self.parent.text.index('insert')
+        Update(self.parent.io.filename, cur, save)
 
     def OnClose(self):
-        SaveCursor(self.parent.text, self.parent.io.filename, False)
+        self.OnSave(False)
 
 
-# TODO 最近保存文件列表（排除已打开文件）
-def GetRecentChangedFiles():
-    # TODO 查看修改日期我之前是怎么写的？
-    rf_path = os.path.join(idleConf.userdir, 'recent-files.lst')
-    with open(rf_path, 'r', encoding='u8') as f:
-        rf_list = f.read().splitlines()
-    rf_list.sort(key=lambda p: os.stat(p).st_mtime if os.path.isfile(p) else 0, reverse=True)
-    return rf_list
+class RecentClosed(tk.Menu):
+    def __init__(self, parent):
+        tk.Menu.__init__(self, parent.menubar, tearoff=0, takefocus=1)
+        self.parent = parent
+        self.data = []
+        self.Update() # TODO 每次点击窗口时更新
+        self.parent.menubar.bind('<Unmap>', print)
+
+    def Update(self, new_file=None): # TODO 排除已打开文件
+        "Load and update the recent files list and menus"
+        rf_list = ReadData()
+        ulchars = "1234567890ABCDEFGHIJK"
+        rf_list = rf_list[0:len(ulchars)]
+        self.delete(0, 'end')  # clear, and rebuild:
+        for i, (cur, file_name) in enumerate(rf_list):
+            callback = self.Callback(file_name)
+            self.add_command(label=ulchars[i] + " " + file_name, command=callback, underline=0)
+
+    def Callback(self, file):
+        def f():
+            self.parent.io.open(editFile=file)
+        return f
 
