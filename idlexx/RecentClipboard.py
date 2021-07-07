@@ -1,6 +1,9 @@
+'''历史剪切板'''
+
 # TODO 不能在多个IDLE中共享
 
 import tkinter as tk
+
 
 class RecentClipboard(tk.Menu):
     def __init__(self, parent):
@@ -10,10 +13,15 @@ class RecentClipboard(tk.Menu):
         self.Add()
         self.Binding()
 
+        parent.rmenu.insert_cascade(3, label='History', menu=self)
+        parent.menudict['advance'].insert_cascade(3, label='Paste from History', menu=self)
+
+        parent.after_copy.append(self.Add) # TODO 剪切时没有
+
     def Add(self):
         try:
             s = self.parent.top.clipboard_get()
-        except:
+        except: # 当剪切板为图像时无法获取
             return
         if not s: # 空字符串
             return
@@ -41,7 +49,7 @@ class RecentClipboard(tk.Menu):
         return s2, paste
 
     def Post(self, e):
-        self.post(e.x_root, e.y_root)
+        self.post(e.x_root, e.y_root) # TODO 参考calltip_w.py获取光标的当前位置并弹出窗口
 
     def Binding(self):
         text = self.parent.text

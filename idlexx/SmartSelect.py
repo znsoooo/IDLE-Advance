@@ -1,9 +1,11 @@
+'''智能选取'''
+
 import re
-from .util import Cur2Lc, Pos2Cur, Cur2Pos, Select, SelectSpan
+from idlexx.util import Cur2Lc, Pos2Cur, Cur2Pos, Select, SelectSpan # TODO 改成extension导入时无法相对导入
 
 def FixTextSelect(root):
     tk = root.tk
-    tk.eval('bind Text <Double-1> {catch {%W mark set insert sel.first}}') #See  "~\tcl\tk8.6\text.tcl"
+    tk.eval('bind Text <Double-1> {catch {%W mark set insert sel.first}}') # See: "~\tcl\tk8.6\text.tcl"
 
 
 def CurrentInTag(text, tag):
@@ -34,7 +36,7 @@ def MatchSpan(r, s, n):
             return m.span()
 
 
-def SmartSelect(e):
+def Selecting(e):
     text = e.widget
     text.tag_remove('hit', '1.0', 'end')
 
@@ -111,3 +113,9 @@ def SmartSelect(e):
             # 改善“s.split('\n')[:ln]”会匹配”')[:“的糟糕匹配体验
             p1, p2 = MatchSpan(r'[^\w\(\)\[\]\{\}\'" ]+', line, col) # 不"粘"括号空格和引号
             Select(text, 'current linestart+%dc'%p1, 'current linestart+%dc'%p2)
+
+
+class SmartSelect:
+    def __init__(self, parent):
+        FixTextSelect(parent.root)
+        parent.text.bind('<Double-Button-1>', Selecting)

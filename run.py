@@ -1,7 +1,7 @@
 from idlexx import test
 
 
-# test.FindKey(r'.*<<find-again>>.*')
+test.FindKey(r'.*\'=\'.*')
 # test.FindKey(r'.*<<.*>>.*')
 # test.FindKey(r'.*\.(open|_close|save).*')
 

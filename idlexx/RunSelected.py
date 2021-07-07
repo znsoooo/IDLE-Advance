@@ -1,3 +1,5 @@
+'''运行选中'''
+
 import tkinter as tk
 
 class RunSelected(tk.Menu):
@@ -6,6 +8,7 @@ class RunSelected(tk.Menu):
         self.parent = parent
         self.MakeMenu(4)
         self.Binding()
+        parent.menudict['advance'].insert_cascade(3, label='Run Selected', menu=self)
 
     def Run(self, mode):
         '''mode: -1, 0, 1'''

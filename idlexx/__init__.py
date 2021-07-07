@@ -1,57 +1,11 @@
 import os
 
-import tkinter as tk
-
-from idlelib.mainmenu import menudefs
-from idlelib.pyshell import main, PyShellFileList, PyShellEditorWindow, PyShell
-import idlelib.pyshell
-
 import idlelib.editor
+from idlelib.editor import EditorWindow
+from idlelib.mainmenu import menudefs
 
-from .ReplaceBar import ReplaceBar
-from .SmartSelect import SmartSelect, FixTextSelect
-from .WindowManager import WindowManager
-from .RecentClipboard import RecentClipboard
 from .CompareFile import CompareFile
-from .RunSelected import RunSelected
-from .CursorHistory import CursorHistory
-from .FileManager import FileManager
 
-from .RecentSaved import RecentSaved, RecentClosed
-from .ReloadFile import Reloader
-
-
-def SmartPairing(e):
-    # TODO 第一次输入右括号时移动光标但不键入
-    # TODO 删除左括号时删除右括号（如果有的话）
-    # TODO 有选区时输入括号不清除选区（包括光标位置）
-    text = e.widget
-    pair = ')]}\'"'['([{\'"'.index(e.char)]
-    ss = e.widget.get('sel.first', 'sel.last')
-    if ss:
-        text.delete('sel.first', 'sel.last')
-    text.mark_gravity('insert', 'left')
-    text.insert('insert', pair)
-    text.insert('insert', ss)
-    text.mark_gravity('insert', 'right')
-
-
-def UniqueFile(file):
-    root = os.path.split(file)[0]
-    n = 1
-    while os.path.exists(file):
-        n += 1
-        file = '%s.%d.pybak'%(root, n)
-    return file
-
-
-def AddXScrollbar(frame, text):
-    # TODO 会导致拖拽打开文件时闪退
-    hbar = tk.Scrollbar(frame, orient='h')
-    hbar['command'] = text.xview
-    text['xscrollcommand'] = hbar.set
-    hbar.pack(fill='x', side='bottom')
-    # TODO 参考 idlelib.textview.ViewWindow 的 AutoHiddenScrollbar 方法
 
 
 mymenudef = ('advance', [
@@ -64,76 +18,34 @@ mymenudef = ('advance', [
 
 menudefs.append(mymenudef)
 
-PyShellEditorWindow.menu_specs.append(('advance', 'Advance')) # 如果写在方法里会导致多次运行时不断追加菜单
 
-class MyPyShellEditorWindow(PyShellEditorWindow):
-    def __init__(self, flist=None, filename=None, key=None, root=None):
-        PyShellEditorWindow.__init__(self, flist, filename, key, root)
-        text = self.text
+class MyEditorWindow(EditorWindow):
+    def __init__(self, *args):
+        if ('advance', 'Advance') not in self.menu_specs:
+            self.menu_specs.append(('advance', 'Advance'))
+
+        EditorWindow.__init__(self, *args)
+
         self.make_rmenu() # make "self.rmenu"
 
-        FixTextSelect(self.root)
-        ReplaceBar(self.text_frame, text)
-        AddXScrollbar(self.text_frame, text)
+        self.after_copy = []
+        self.after_save = []
+        self.after_close = []
 
-        # 光标位置
-        CursorHistory(text)
-
-        for c in '([{\'"':
-            text.bind('<%s>'%c, SmartPairing) # '<KeyRelease-%s>'%c
-        text.bind('<Double-Button-1>', SmartSelect)
-        text.bind('<<compare-file>>', self.OnCompareFile)
-
-        # 快速正反搜索
-        text.bind('<F3>', self.OnSearchForward)
-        text.bind('<Shift-F3>', self.OnSearchBackward)
-
-        # 历史剪切板功能
-        self.menu_clip = RecentClipboard(self)
-        self.rmenu.insert_cascade(3, label='History', menu=self.menu_clip)
-        self.menudict['advance'].insert_cascade(3, label='Paste from History', menu=self.menu_clip)
-
-        # 窗口操作
-        menu_windows = WindowManager(self)
-        self.menudict['advance'].insert_cascade(3, label='Window Manager', menu=menu_windows)
-
-        # 文件操作
-        menu_files = FileManager(self.root, self.text, self.io)
-        self.menudict['advance'].insert_cascade(3, label='File Manager', menu=menu_files)
-
-        # 位置记录
-        self.menu_recorder = RecentSaved(self)
-        self.menu_recorder.OnOpen()
-        self.text.bind("<<save-window>>", self.OnSave)
-
-        # 最近保存
-        self.menu_rc = RecentClosed(self)
-        self.menudict['advance'].insert_cascade(3, label='Recent Edit Files', menu=self.menu_rc)
-
-        # 运行选中
-        menu_runner = RunSelected(self) # TODO 添加到顶层菜单
-        self.menudict['advance'].insert_cascade(3, label='Run Selected', menu=menu_runner)
-
-        # 重载文件
-        self.reloader = Reloader(self)
-        self.text_frame.bind('<FocusIn>', self.reloader.OnFocusIn)
-
-        try:
-            import windnd
-            windnd.hook_dropfiles(self.text, func=self.DragOpen)
-        except:
-            pass
-
+        text = self.text
+        text.bind("<<save-window>>", self.save) # fix all event handle in this class.
         text.bind('<F2>', self.Test)
 
+        # 最近保存
+        # self.menu_rc = RecentClosed(self)
 
-    def Test(self, e):
-        print('editor ontest')
-        print(self.text.tag_names())
+        self.load_idlexx_extensions()
 
-    def copy(self, event):
+
+    def copy(self, event): # TODO 没有对应剪切
         super().copy(event)
-        self.menu_clip.Add()
+        for fun in self.after_copy:
+            fun()
 
     def _close(self): # TODO 退出未保存前保存备份（.pybak）
         print('handle with edit _close:', self.io.filename)
@@ -143,76 +55,77 @@ class MyPyShellEditorWindow(PyShellEditorWindow):
     def close(self):
         # "<<close-window>>"事件不命中点击窗口关闭事件
         print('handle with edit close:', self.io.filename)
-        self.menu_recorder.OnClose()
+        for fun in self.after_close:
+            fun()
         super().close()
 
-    def OnSearchForward(self, e):
-        engin = idlelib.editor.search._setup(self.text)
-        engin.engine.backvar.set(False)
-        engin.find_again(self.text)
-
-    def OnSearchBackward(self, e):
-        engin = idlelib.editor.search._setup(self.text)
-        engin.engine.backvar.set(True)
-        engin.find_again(self.text)
-
-
-    def OnSave(self, e): # TODO 重写save时的备份策略，参考notepad++的备份频率
+    def save(self, e): # TODO 重写save时的备份策略，参考notepad++的备份频率
         self.io.save(e) # TODO 如果文件未修改则不备份、关闭前备份、关闭未保存备份、定时器备份
-        self.io.writefile(UniqueFile(self.io.filename))
-        self.menu_recorder.OnSave()
-        self.menu_rc.Update()
-        self.reloader.Refresh()
+        for fun in self.after_save:
+            fun()
+        #
+        # self.menu_rc.Update()
 
-    def OnCompareFile(self, e):
-        file1 = self.io.filename
-        file2 = self.io.askopenfile()
-        if file2:
-            CompareFile(self.text, file1, file2)
-
-    def DragOpen(self, files): # TODO 恢复记忆位置
-        for file_b in files:
-            file = file_b.decode('gbk')
-            if file.endswith('.py'):
-                edit = self.flist.open(file)
-                # TODO 由于滚动条存在导致有时候拖拽加载会闪退，增加下面两行可以避免
-                edit.text.tag_add("sel", "insert", "insert+1c")
-                edit.text.tag_remove("sel", "1.0", "end")
-
-                # TODO 是否可以
-                # self.io.open(editFile=file)
-
-
-class MyPyShell(PyShell):
-    def __init__(self, flist=None):
-        PyShell.__init__(self, flist)
-        self.text.bind('<F2>', self.Test)
+    def load_idlexx_extensions(self):
+        for file in os.listdir(os.path.dirname(__file__)):
+            name, ext = os.path.splitext(file)
+            if ext == '.py' and name not in ['__init__', 'util', 'run', 'test']: # TODO 简化排除表达
+                try:
+                    self.load_extension(name)
+                except Exception as e:
+                    print("Failed to import IDLEXX extension: %s" % name)
+                    import traceback
+                    traceback.print_exc()
 
     def Test(self, e):
-        print('shell ontest')
+        print('editor ontest')
         print(self.text.tag_names())
-        for name in self.text.tag_names():
-            print(name, self.text.tag_ranges(name))
 
 
 
-idlelib.pyshell.PyShell = MyPyShell
-
-
-class MyPyShellFileList(PyShellFileList):
-    EditorWindow = MyPyShellEditorWindow
+idlelib.editor.EditorWindow = MyEditorWindow
+from idlelib.pyshell import main#, PyShell
+# import idlelib.pyshell
+#
+#
+# class MyPyShell(PyShell):
+#     def __init__(self, flist=None):
+#         PyShell.__init__(self, flist)
+#         self.text.bind('<F2>', self.Test)
+#
+#     def Test(self, e):
+#         print('shell ontest')
+#         text = self.text
+#
+#         print([v for v in dir(text) if 'tag' in v or 'mark' in v])
+#         print(text.mark_names())
+#         print(text.tag_names())
+#         for name in text.tag_names():
+#             print(name, text.tag_ranges(name))
+#         print(text.tag_nextrange('stdin', '1.0'))
+#         print(text.index('restart'))
+#
+#         ranges = text.tag_ranges('stdin')
+#         codes = []
+#         for i in range(0, len(ranges), 2):
+#             code = text.get(ranges[i], ranges[i+1]).strip()
+#             if code:
+#                 codes.append(code)
+#         s = '\n'.join(codes)
+#         print(s)
+#
+#
+# idlelib.pyshell.PyShell = MyPyShell
 
 
 def run(filename=__file__):
     if filename:
         import sys
         sys.argv.append(filename) # Idea from "~\Lib\tkinter\__main__.py"
-        # sys.argv.append(r'F:\lsx\coding\监控\udp.py')
-    idlelib.pyshell.PyShellFileList = MyPyShellFileList
     main()
 
 
-
+import idlelib.run
 '''
 TODO 参考历史文件的打开方法，用于拖拽打开和恢复打开文件
 def __recent_file_callback(self, file_name):
@@ -233,3 +146,6 @@ def update_recent_files_list(self, new_file=None):
     for instance in self.top.instance_dict:
         menu = instance.recent_files_menu
 '''
+
+# pyshell.PyShellEditorWindow -> editor.EditorWindow
+# pyshell.PyShell -> outwin.OutputWindow -> editor.EditorWindow

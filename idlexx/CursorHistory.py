@@ -1,8 +1,10 @@
+'''光标记录'''
+
 class CursorHistory:
-    def __init__(self, text):
-        self.text = text
+    def __init__(self, parent):
+        self.text = parent.text
         self.pointer = 0
-        self.history = ['1.0']
+        self.history = ['1.0'] # TODO 第一次是1.0或上次关闭前记录的位置
         self.Binding()
 
     def Add(self, e):

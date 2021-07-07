@@ -1,6 +1,8 @@
+'''搜索替换工具条'''
+
 import re
 import tkinter as tk
-from .util import Cur2Lc, Pos2Cur, Cur2Pos, Select, SelectSpan
+from idlexx.util import Cur2Lc, Pos2Cur, Cur2Pos, Select, SelectSpan # TODO 使用load_extension时导入的问题
 
 
 def PrepFind(s, pat, repl, isre=False, case=True, word=False):
@@ -27,10 +29,10 @@ print('PrepFind Test Repl:', s == re.sub('1', repl, '1'))
 
 
 class ReplaceBar(tk.Frame):
-    def __init__(self, master=None, text=None):
-        tk.Frame.__init__(self, master)
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent.text_frame)
 
-        self.text = text
+        self.text = parent.text
 
         s = self
 

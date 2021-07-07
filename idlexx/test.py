@@ -1,7 +1,7 @@
 import os
 import re
 import sys
-from .util import Cur2Lc, Pos2Cur, Cur2Pos, Select, SelectSpan
+from idlexx.util import Cur2Lc, Pos2Cur, Cur2Pos, Select, SelectSpan
 
 # print(bytes(range(128)))
 # print(re.sub(rb'\w', b'', bytes(range(128))))

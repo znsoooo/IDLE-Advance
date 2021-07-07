@@ -1,3 +1,5 @@
+'''文本比较'''
+
 import os
 import difflib
 import webbrowser
@@ -7,7 +9,7 @@ from idlelib.textview import ViewWindow, Button  # Button is ttk.Button
 
 # TODO 支持选择py或全部格式文件
 
-def CompareFile(parent, file1, file2):  # TODO 移植到不依赖输入，支持任意文件接口
+def Comparing(parent, file1, file2):  # TODO 移植到不依赖输入，支持任意文件接口
     with open(file1, encoding='u8') as f:
         ss1 = f.read().split('\n')
     with open(file2, encoding='u8') as f:
@@ -32,3 +34,16 @@ def CompareFile(parent, file1, file2):  # TODO 移植到不依赖输入，支持
     toolbar.pack()
 
     dlg.wait_window()
+
+
+class CompareFile:
+    def __init__(self, parent):
+        self.text = parent.text
+        self.io = parent.io
+        self.text.bind('<<compare-file>>', self.OnCompareFile)
+
+    def OnCompareFile(self, e):
+        file1 = self.io.filename
+        file2 = self.io.askopenfile()
+        if file2:
+            Comparing(self.text, file1, file2)

@@ -1,3 +1,5 @@
+'''文本索引转换函数'''
+
 def Cur2Lc(cur):
     return tuple(map(int, cur.split('.')))
 
