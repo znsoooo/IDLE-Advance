@@ -1,7 +1,14 @@
 '''智能选取'''
 
+
+if __name__ == '__main__':
+    import __init__
+    __init__.test_editor(__file__)
+
+
 import re
-from idlexx.util import Cur2Lc, Pos2Cur, Cur2Pos, Select, SelectSpan # TODO 改成extension导入时无法相对导入
+from idlexx.test.util import Cur2Lc, Pos2Cur, Select  # TODO 相对导入问题
+
 
 def FixTextSelect(root):
     tk = root.tk

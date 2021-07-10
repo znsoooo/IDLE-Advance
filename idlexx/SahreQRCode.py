@@ -1,5 +1,11 @@
 '''将选中代码转化为二维码'''
 
+
+if __name__ == '__main__':
+    import __init__
+    __init__.test_editor(__file__)
+
+
 import tkinter as tk
 from PIL import ImageTk
 

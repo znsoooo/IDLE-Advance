@@ -1,5 +1,11 @@
 '''匹配成对括号'''
 
+
+if __name__ == '__main__':
+    import __init__
+    __init__.test_editor(__file__)
+
+
 def Pairing(e):
     # TODO 第一次输入右括号时移动光标但不键入
     # TODO 删除左括号时删除右括号（如果有的话）

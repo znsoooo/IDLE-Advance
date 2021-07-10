@@ -1,7 +1,14 @@
 '''窗口操作'''
 
+
+if __name__ == '__main__':
+    import __init__
+    __init__.test_editor(__file__)
+
+
 import os
 import tkinter as tk
+
 
 class WindowManager(tk.Menu):
     def __init__(self, parent):

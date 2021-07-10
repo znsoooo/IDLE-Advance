@@ -1,10 +1,17 @@
 '''文件操作'''
 
+
+if __name__ == '__main__':
+    import __init__
+    __init__.test_editor(__file__)
+
+
 import os
 from os.path import dirname, basename
 import subprocess
 import tkinter as tk
 from tkinter.simpledialog import askstring
+
 
 class FileManager(tk.Menu):
     def __init__(self, parent):
@@ -35,10 +42,6 @@ class FileManager(tk.Menu):
         text.bind('<F2>', lambda e: self.Rename(text, io))
 
         parent.menudict['advance'].insert_cascade(3, label='File Manager', menu=self)
-
-
-        # TODO rename, reload, copy, backup
-
 
     def Rename(self, text, io):
         basename2 = basename(io.filename)

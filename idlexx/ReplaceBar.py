@@ -1,10 +1,16 @@
 '''搜索替换工具条'''
 
-# TODO 处理好和进度条的相对位置问题
+# TODO 处理好和纵向滚动条的相对位置问题
+
+
+if __name__ == '__main__':
+    import __init__
+    __init__.test_editor(__file__)
+
 
 import re
 import tkinter as tk
-from idlexx.util import Cur2Lc, Pos2Cur, Cur2Pos, Select, SelectSpan # TODO 使用load_extension时导入的问题
+from idlexx.test.util import Pos2Cur, Cur2Pos, SelectSpan # TODO 相对导入问题
 
 
 def PrepFind(s, pat, repl, isre=False, case=True, word=False):
@@ -22,12 +28,6 @@ def PrepFind(s, pat, repl, isre=False, case=True, word=False):
         pat = r'\b' + pat + r'\b'
 
     return pat, repl
-
-
-s = bytes(range(128)).decode()
-pat, repl = PrepFind('', s, s)
-print('PrepFind Test Patt:', s == re.sub(pat, '', s))
-print('PrepFind Test Repl:', s == re.sub('1', repl, '1'))
 
 
 class ReplaceBar(tk.Frame):
@@ -70,10 +70,8 @@ class ReplaceBar(tk.Frame):
 
         self.pack(fill='x', side='bottom')
 
-
     def Setting(self, *args):
         self.Find()
-
 
     def Find(self):
         self.text.tag_remove('hit', '1.0', 'end')
@@ -97,14 +95,12 @@ class ReplaceBar(tk.Frame):
 
         return matchs, s, pat, repl
 
-
     def Highlight(self):
         # TODO 未完成
         matchs = [m.span() for m in re.finditer(pat, s)]
         self.tip.config(text=' Match: %d'%len(matchs))
         for p1, p2 in matchs:
             self.text.tag_add('hit', Pos2Cur(s, p1), Pos2Cur(s, p2))
-
 
     def View(self, next):
         '''next: 1 -> forward, 0 -> backward'''
@@ -118,7 +114,6 @@ class ReplaceBar(tk.Frame):
             SelectSpan(self.text, matchs[new], next)
             self.tip.config(text=' Match: %d/%d' % (new+1, len(matchs)))
 
-
     def Replace(self):
         next = not self.backvar.get()
         if not self.text.get('sel.first', 'sel.last'):
@@ -127,7 +122,6 @@ class ReplaceBar(tk.Frame):
             return # 第一次只匹配不替换
         self.ReplaceAll()
         self.View(next)
-
 
     def ReplaceAll(self):
         ss = self.text.get('sel.first', 'sel.last')
@@ -141,3 +135,9 @@ class ReplaceBar(tk.Frame):
         self.text.insert('insert', s2) # TODO 光标移动到了最后
         # TODO 替换选中的部分
 
+
+if __name__ == '__main__':
+    s = bytes(range(128)).decode()
+    pat, repl = PrepFind('', s, s)
+    print('PrepFind Test Patt:', s == re.sub(pat, '', s))
+    print('PrepFind Test Repl:', s == re.sub('1', repl, '1'))

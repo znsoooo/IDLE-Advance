@@ -1,14 +1,27 @@
-'''运行选中'''
+'''
+editor-only
+运行选中
+'''
+
+if __name__ == '__main__':
+    import __init__
+    __init__.test_editor(__file__)
+
 
 import tkinter as tk
+from idlelib.pyshell import PyShell
+
 
 class RunSelected(tk.Menu):
     def __init__(self, parent):
+        if isinstance(parent, PyShell):
+            return
+
         tk.Menu.__init__(self, parent.menubar, tearoff=0)
         self.parent = parent
         self.MakeMenu(4)
         self.Binding()
-        parent.menudict['advance'].insert_cascade(3, label='Run Selected', menu=self)
+        parent.menudict['advance'].insert_cascade(3, label='Run Selected', menu=self) # TODO 单元测试时插入偏差
 
     def Run(self, mode):
         '''mode: -1, 0, 1'''
@@ -47,3 +60,4 @@ class RunSelected(tk.Menu):
         text.bind('<F6>', lambda e: self.Run(-1))
         text.bind('<F7>', lambda e: self.Run(0))
         text.bind('<F8>', lambda e: self.Run(1))
+

@@ -1,6 +1,15 @@
-'''仅拷贝Shell的代码'''
+'''
+shell-only
+仅拷贝Shell的代码
+'''
 
-# TODO 右键菜单、顶部菜单、拷贝区域范围代码、拷贝本次restart范围的代码
+# TODO 添加顶部菜单
+
+
+if __name__ == '__main__':
+    import __init__
+    __init__.test_shell(__file__)
+
 
 from idlelib.pyshell import PyShell
 
@@ -16,6 +25,8 @@ def GetCodes(text):
     else:
         sted = '1.0,end'
     st, ed = sted.split(',')
+    if not text.tag_ranges("sel"):
+        text.tag_add('sel', st, ed) # Select the area to see the selection.
 
     st_range = text.tag_nextrange('stdin', st)
     ed_range = text.tag_prevrange('stdin', ed)
@@ -25,20 +36,26 @@ def GetCodes(text):
         ranges = ranges[ranges.index(st_range):ranges.index(ed_range) + 1]
         codes = [text.get(*r) for r in ranges]
         s = ''.join(codes)
-        return s
+        return s.strip()
     return ''
 
 
 class SmartCopy:
     def __init__(self, parent):
         self.text = parent.text
+        self.io = parent.io
+        self.flist = parent.flist
         if isinstance(parent, PyShell):
-            self.text.bind('<F2>', self.Copying)
+            n = 5
+            parent.rmenu.insert_separator(n)
+            parent.rmenu.insert_command(n, label='Export to File', command=self.New)
+            parent.rmenu.insert_command(n, label='Copy Code', command=self.Copy)
 
-    def Copying(self, e):
-        text = self.text
-        s = GetCodes(text)
-        print(s)
+    def Copy(self):
+        self.text.clipboard_clear()
+        self.text.clipboard_append(GetCodes(self.text))
 
-# TODO 增加右键、一键新建操作记录脚本
-
+    def New(self): # See: idlelib.editor.EditorWindow.new_callback
+        dirname, basename = self.io.defaultfilename()
+        editwin = self.flist.new(dirname)
+        editwin.text.insert('1.0', GetCodes(self.text))

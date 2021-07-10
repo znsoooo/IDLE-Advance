@@ -1,5 +1,11 @@
 '''重载文件'''
 
+
+if __name__ == '__main__':
+    import __init__
+    __init__.test_editor(__file__)
+
+
 import os
 from tkinter.messagebox import askyesno
 

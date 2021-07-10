@@ -1,5 +1,11 @@
 '''拖拽打开'''
 
+
+if __name__ == '__main__':
+    import __init__
+    __init__.test_editor(__file__)
+
+
 class DragOpen:
     def __init__(self, parent):
         self.flist = parent.flist

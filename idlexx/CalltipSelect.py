@@ -1,7 +1,16 @@
-import tkinter as tk
-import idlelib.calltip
+'''可选中函数提示'''
 
 # TODO 显示完整的__doc__内容并自动调整文本框大小，需要修改idlelib.calltip.get_argspec函数，可能没有简洁的实现方法。
+
+
+if __name__ == '__main__':
+    import __init__
+    __init__.test_editor(__file__)
+
+
+import tkinter as tk
+# import idlelib.calltip
+
 
 # _MAX_LINES = idlelib.calltip._MAX_LINES
 # _MAX_COLS = idlelib.calltip._MAX_COLS

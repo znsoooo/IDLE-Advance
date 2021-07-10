@@ -1,15 +1,24 @@
+'''
+运行run.py获得一个加载所有插件的IDLE-Advance的示例文件
+运行__init__.py获得一个打开自身脚本并加载所有插件的editor的例子
+分别运行idlexx目录下的扩展文件，可以得到一个打开自身的editor的例子（有的是shell的例子）
+如果需要个别扩展不需要加载，将对应的文件从文件夹目录内移除后再次运行即可
+'''
+
 import os
 
-### test
 import idlelib.calltip
+
+EXTENSIONS = []
 
 # idlelib.calltip._MAX_LINES = 999
 # idlelib.calltip._MAX_COLS = 999
 
+
 class Calltip(idlelib.calltip.Calltip):
     def __init__(self, editwin=None):
         super().__init__(editwin)
-        editwin.ctip = self
+        editwin.ctip = self # make hook
 
     # def fetch_tip(self, expression):
     #     self.expression = expression
@@ -19,11 +28,21 @@ class Calltip(idlelib.calltip.Calltip):
 
 idlelib.calltip.Calltip = Calltip
 
-###
+
+def FixPath():
+    # To fix open shell (call run() without sys.argv) or self.load_extension(name) will not work.
+    import sys
+    path = os.path.dirname(__file__)
+    if path not in sys.path:
+        sys.path.insert(0, path)
+
 
 import idlelib.editor
 from idlelib.editor import EditorWindow
 from idlelib.mainmenu import menudefs
+
+# editor.EditorWindow -> pyshell.PyShellEditorWindow
+# editor.EditorWindow -> outwin.OutputWindow -> pyshell.PyShell
 
 
 mymenudef = ('advance', [
@@ -66,7 +85,7 @@ class MyEditorWindow(EditorWindow):
         for fun in self.after_copy:
             fun()
 
-    def _close(self): # TODO 退出未保存前保存备份（.pybak）
+    def _close(self):
         print('handle with edit _close:', self.io.filename)
         super()._close()
         # raise # TODO 是否还有别的方法阻止清空剪切
@@ -78,17 +97,17 @@ class MyEditorWindow(EditorWindow):
             fun()
         super().close()
 
-    def save(self, e): # TODO 重写save时的备份策略，参考notepad++的备份频率
-        self.io.save(e) # TODO 如果文件未修改则不备份、关闭前备份、关闭未保存备份、定时器备份
+    def save(self, e):
+        self.io.save(e)
         for fun in self.after_save:
             fun()
 
     def load_idlexx_extensions(self):
-        for file in os.listdir(os.path.dirname(__file__)):
-            name, ext = os.path.splitext(file)
-            if ext == '.py' and name not in ['__init__', 'util', 'run', 'test']: # TODO 简化排除表达
+        for file in EXTENSIONS:
+            name, ext = os.path.splitext(os.path.basename(file))
+            if ext == '.py' and name != '__init__':
                 try:
-                    self.load_extension(name)
+                    self.load_extension(name) # TODO 支持任意位置文件导入
                 except Exception as e:
                     print("Failed to import IDLEXX extension: %s" % name)
                     import traceback
@@ -98,20 +117,36 @@ class MyEditorWindow(EditorWindow):
         print('editor ontest')
         print('mark_names:', self.text.mark_names())
         print('tag_names:', self.text.tag_names())
+        print('functions:', ' '.join(v for v in dir(self.text) if 'tag' in v or 'mark' in v))
 
 
 idlelib.editor.EditorWindow = MyEditorWindow
 from idlelib.pyshell import main  # must after hot patch
 
 
-def run(filename=__file__):
+def run(filename=None, exts=[]):
+    FixPath()
+    EXTENSIONS.extend(exts)
+    if not EXTENSIONS:
+        EXTENSIONS.extend(file for file in os.listdir(os.path.dirname(__file__)))
     if filename:
         import sys
         sys.argv.append(filename) # Idea from "~\Lib\tkinter\__main__.py"
     main()
 
 
-import idlelib.run
+def test_editor(script_file):
+    run(script_file, [script_file])
+
+
+def test_shell(script_file):
+    run(None, [script_file])
+
+
+if __name__ == '__main__':
+    run(__file__)
+
+
 '''
 TODO 参考历史文件的打开方法，用于拖拽打开和恢复打开文件
 def __recent_file_callback(self, file_name):
@@ -132,6 +167,3 @@ def update_recent_files_list(self, new_file=None):
     for instance in self.top.instance_dict:
         menu = instance.recent_files_menu
 '''
-
-# editor.EditorWindow -> pyshell.PyShellEditorWindow
-# editor.EditorWindow -> outwin.OutputWindow -> pyshell.PyShell

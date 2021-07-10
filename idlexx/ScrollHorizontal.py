@@ -1,6 +1,13 @@
 '''横向滚动条'''
 
+
+if __name__ == '__main__':
+    import __init__
+    __init__.test_editor(__file__)
+
+
 import tkinter as tk
+
 
 class ScrollHorizontal:
     def __init__(self, parent):

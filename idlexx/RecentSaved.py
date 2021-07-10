@@ -2,9 +2,15 @@
 
 # TODO 未保存文档但更新位置，可能导致光标位置指向错误？
 
+
+if __name__ == '__main__':
+    import __init__
+    __init__.test_editor(__file__)
+
+
 import os
 import csv
-import tkinter as tk
+# import tkinter as tk
 from idlelib.config import idleConf
 
 rc_path = os.path.join(idleConf.userdir, 'recent-saved.lst')

@@ -1,9 +1,15 @@
 '''自动备份'''
 
+
+if __name__ == '__main__':
+    import __init__
+    __init__.test_editor(__file__)
+
+
 import os
-from tkinter.messagebox import showinfo
 
 TICK = 7000
+
 
 class AutoSave:
     def __init__(self, parent):
@@ -21,7 +27,7 @@ class AutoSave:
         filename = self.io.filename
         if filename:
             filename_bak = os.path.splitext(filename)[0] + '.pybak'
-            if self.get_saved():
+            if self.get_saved(): # TODO 当文件关闭后会再运行一次，会在这里获取判断失败
                 if os.path.isfile(filename_bak):
                     os.remove(filename_bak)
             else:
