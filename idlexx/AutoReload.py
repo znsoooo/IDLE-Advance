@@ -13,20 +13,22 @@ def mtime(file):
 
 class AutoReload:
     def __init__(self, parent):
-        self.parent = parent
-        self.mt = mtime(self.parent.io.filename)
+        self.root = parent.root
+        self.io = parent.io
+
+        self.mt = mtime(self.io.filename)
         parent.text_frame.bind('<FocusIn>', self.OnFocusIn)
         parent.after_save.append(self.Refresh)
 
     def Refresh(self):
-        self.mt = mtime(self.parent.io.filename)
+        self.mt = mtime(self.io.filename)
 
     def ReloadFile(self): # TODO 重载记忆位置
-        self.parent.io.loadfile(self.parent.io.filename)  # TODO rename也可以用这个方法
+        self.io.loadfile(self.io.filename)  # TODO rename也可以用这个方法
 
     def OnFocusIn(self, e):
-        mt = mtime(self.parent.io.filename)
+        mt = mtime(self.io.filename)
         if self.mt != mt:
             self.mt = mt  # 激活窗口最多只提示一次，下一次提示在本地文件再次发生修改
-            if askyesno('Refresh?', 'Find text changed, do you need to refresh?', parent=self.parent.text):  # TODO 参考notepad的窗口提示文本
+            if askyesno('Refresh?', 'Find text changed, do you need to refresh?', parent=self.root):  # TODO 参考notepad的窗口提示文本
                 self.ReloadFile()

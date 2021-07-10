@@ -1,5 +1,7 @@
 '''位置记录'''
 
+# TODO 未保存文档但更新位置，可能导致光标位置指向错误？
+
 import os
 import csv
 import tkinter as tk
@@ -45,11 +47,11 @@ def Update(file, cur, save=True):
 class RecentSaved:
     def __init__(self, parent):
         self.parent = parent
-        self.OnOpen()
+        self.AfterOpen()
         parent.after_save.append(self.OnSave)
         parent.after_close.append(self.OnClose)
 
-    def OnOpen(self):
+    def AfterOpen(self):
         if not self.parent.io.filename:
             return
         data = ReadData()

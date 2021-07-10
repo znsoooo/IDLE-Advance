@@ -1,11 +1,29 @@
 import os
 
+### test
+import idlelib.calltip
+
+# idlelib.calltip._MAX_LINES = 999
+# idlelib.calltip._MAX_COLS = 999
+
+class Calltip(idlelib.calltip.Calltip):
+    def __init__(self, editwin=None):
+        super().__init__(editwin)
+        editwin.ctip = self
+
+    # def fetch_tip(self, expression):
+    #     self.expression = expression
+    #     self.argspec = super().fetch_tip(expression)
+    #     return self.argspec
+
+
+idlelib.calltip.Calltip = Calltip
+
+###
+
 import idlelib.editor
 from idlelib.editor import EditorWindow
 from idlelib.mainmenu import menudefs
-
-from .CompareFile import CompareFile
-
 
 
 mymenudef = ('advance', [
@@ -14,6 +32,8 @@ mymenudef = ('advance', [
     None,
     None,
     ('Compare to File', '<<compare-file>>'),
+    None,
+    ('Share QRCode', '<<share-qrcode>>'),
     ])
 
 menudefs.append(mymenudef)
@@ -34,13 +54,12 @@ class MyEditorWindow(EditorWindow):
 
         text = self.text
         text.bind("<<save-window>>", self.save) # fix all event handle in this class.
-        text.bind('<F2>', self.Test)
-
-        # 最近保存
-        # self.menu_rc = RecentClosed(self)
+        text.bind('<F12>', self.Test)
 
         self.load_idlexx_extensions()
 
+        # 最近保存 TODO 无法在激活菜单时更新
+        # self.menu_rc = RecentClosed(self)
 
     def copy(self, event): # TODO 没有对应剪切
         super().copy(event)
@@ -63,8 +82,6 @@ class MyEditorWindow(EditorWindow):
         self.io.save(e) # TODO 如果文件未修改则不备份、关闭前备份、关闭未保存备份、定时器备份
         for fun in self.after_save:
             fun()
-        #
-        # self.menu_rc.Update()
 
     def load_idlexx_extensions(self):
         for file in os.listdir(os.path.dirname(__file__)):
@@ -79,43 +96,12 @@ class MyEditorWindow(EditorWindow):
 
     def Test(self, e):
         print('editor ontest')
-        print(self.text.tag_names())
-
+        print('mark_names:', self.text.mark_names())
+        print('tag_names:', self.text.tag_names())
 
 
 idlelib.editor.EditorWindow = MyEditorWindow
-from idlelib.pyshell import main#, PyShell
-# import idlelib.pyshell
-#
-#
-# class MyPyShell(PyShell):
-#     def __init__(self, flist=None):
-#         PyShell.__init__(self, flist)
-#         self.text.bind('<F2>', self.Test)
-#
-#     def Test(self, e):
-#         print('shell ontest')
-#         text = self.text
-#
-#         print([v for v in dir(text) if 'tag' in v or 'mark' in v])
-#         print(text.mark_names())
-#         print(text.tag_names())
-#         for name in text.tag_names():
-#             print(name, text.tag_ranges(name))
-#         print(text.tag_nextrange('stdin', '1.0'))
-#         print(text.index('restart'))
-#
-#         ranges = text.tag_ranges('stdin')
-#         codes = []
-#         for i in range(0, len(ranges), 2):
-#             code = text.get(ranges[i], ranges[i+1]).strip()
-#             if code:
-#                 codes.append(code)
-#         s = '\n'.join(codes)
-#         print(s)
-#
-#
-# idlelib.pyshell.PyShell = MyPyShell
+from idlelib.pyshell import main  # must after hot patch
 
 
 def run(filename=__file__):
@@ -147,5 +133,5 @@ def update_recent_files_list(self, new_file=None):
         menu = instance.recent_files_menu
 '''
 
-# pyshell.PyShellEditorWindow -> editor.EditorWindow
-# pyshell.PyShell -> outwin.OutputWindow -> editor.EditorWindow
+# editor.EditorWindow -> pyshell.PyShellEditorWindow
+# editor.EditorWindow -> outwin.OutputWindow -> pyshell.PyShell

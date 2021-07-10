@@ -19,4 +19,4 @@ class SmartPairing:
     def __init__(self, parent):
         text = parent.text
         for c in '([{\'"':
-            text.bind('<%s>' % c, SmartPairing)  # '<KeyRelease-%s>'%c
+            text.bind('<%s>' % c, Pairing)  # '<KeyRelease-%s>'%c

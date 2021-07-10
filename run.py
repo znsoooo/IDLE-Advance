@@ -24,3 +24,5 @@ import tkinter as tk
 from idlexx import run
 
 run()
+
+# TODO 检查run(None)只运行shell时运行错误的原因

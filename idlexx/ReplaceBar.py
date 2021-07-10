@@ -1,5 +1,7 @@
 '''搜索替换工具条'''
 
+# TODO 处理好和进度条的相对位置问题
+
 import re
 import tkinter as tk
 from idlexx.util import Cur2Lc, Pos2Cur, Cur2Pos, Select, SelectSpan # TODO 使用load_extension时导入的问题
@@ -33,8 +35,6 @@ class ReplaceBar(tk.Frame):
         tk.Frame.__init__(self, parent.text_frame)
 
         self.text = parent.text
-
-        s = self
 
         # TODO 从idle中获取设置
         self.patvar  = tk.StringVar(self, '')     # search pattern
