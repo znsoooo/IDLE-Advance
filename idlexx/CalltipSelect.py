@@ -40,7 +40,7 @@ import tkinter as tk
 #         # s2 = '\n'.join('%d: '%(ln+1) + line*2 for ln, line in enumerate(self.s.split('\n')))
 #         # self.label.config(text=s2) # hack in !!!
 #
-#         self.text.bind("<FocusOut>", print) # unbind auto hide. TODO 运行完移除，注意别的影响
+#         self.text.bind('<FocusOut>', print) # unbind auto hide. TODO 运行完移除，注意别的影响
 #
 #         # self.label.bind('<Button>', self.OnClick)  # Exp 1: click and insert
 #         self.label.bind('<Enter>', self.OnEnter) # Exp 2: enter and change widget to tk.Text
@@ -68,7 +68,7 @@ import tkinter as tk
 #         self.label.forget()
 #
 #         # TODO 没有双击选中了
-#         text2 = tk.Text(self.top, background="#ffffe0", relief='solid', borderwidth=1, font=self.text['font'])
+#         text2 = tk.Text(self.top, background='#ffffe0', relief='solid', borderwidth=1, font=self.text['font'])
 #         text2.insert('1.0', s)
 #         text2.pack(expand=1, fill='both')
 #
@@ -91,7 +91,7 @@ class CalltipSelect:
     def open_calltip(self, e):
         self.ctip._open_calltip(False)
         self.first = False
-        self.text.bind("<FocusOut>", print) # unbind auto hide. TODO 运行完移除，注意别的影响
+        self.text.bind('<FocusOut>', print) # unbind auto hide. TODO 运行完移除，注意别的影响
 
         calltip = self.ctip.active_calltip
         self.top   = calltip.tipwindow
@@ -107,7 +107,7 @@ class CalltipSelect:
         self.first = True
 
         self.label.forget()
-        text2 = tk.Text(self.top, background="#ffffe0", relief='solid', borderwidth=1, font=self.text['font'])
+        text2 = tk.Text(self.top, background='#ffffe0', relief='solid', borderwidth=1, font=self.text['font'])
         text2.insert('1.0', s)
         text2.pack(expand=1, fill='both')
         # TODO 没有双击选中了

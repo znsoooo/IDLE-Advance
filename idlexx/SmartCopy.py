@@ -15,7 +15,7 @@ from idlelib.pyshell import PyShell
 
 
 def GetCodes(text):
-    if text.tag_ranges("sel"):
+    if text.tag_ranges('sel'):
         sted = 'sel.first,sel.last'
     elif text.index('restart'):
         if text.compare('insert', '>', 'restart'):
@@ -25,7 +25,7 @@ def GetCodes(text):
     else:
         sted = '1.0,end'
     st, ed = sted.split(',')
-    if not text.tag_ranges("sel"):
+    if not text.tag_ranges('sel'):
         text.tag_add('sel', st, ed) # Select the area to see the selection.
 
     st_range = text.tag_nextrange('stdin', st)

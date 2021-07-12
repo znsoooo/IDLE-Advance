@@ -52,32 +52,33 @@ def Update(file, cur, save=True):
 
 class RecentSaved:
     def __init__(self, parent):
-        self.parent = parent
+        self.text = parent.text
+        self.io = parent.io
         self.AfterOpen()
         parent.after_save.append(self.OnSave)
         parent.after_close.append(self.OnClose)
 
     def AfterOpen(self):
-        if not self.parent.io.filename:
+        if not self.io.filename:
             return
         data = ReadData()
-        ret = FindInData(data, self.parent.io.filename)
+        ret = FindInData(data, self.io.filename)
         if ret:
             cur = ret[1]
-            text = self.parent.text
+            text = self.text
             text.mark_set('insert', cur)
             text.see(cur)
-            text.tag_remove("sel", "1.0", "end")
-            text.tag_add("sel", "insert linestart", "insert linestart+1l")
+            text.tag_remove('sel', '1.0', 'end')
+            text.tag_add('sel', 'insert linestart', 'insert linestart+1l')
         else:
-            data.insert(0, ['1:0', self.parent.io.filename])
+            data.insert(0, ['1:0', self.io.filename])
             SaveData(data)
 
     def OnSave(self, save=True):
-        if not self.parent.io.filename:
+        if not self.io.filename:
             return
-        cur = self.parent.text.index('insert')
-        Update(self.parent.io.filename, cur, save)
+        cur = self.text.index('insert')
+        Update(self.io.filename, cur, save)
 
     def OnClose(self):
         self.OnSave(False)

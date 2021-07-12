@@ -5,6 +5,7 @@
 如果需要个别扩展不需要加载，将对应的文件从文件夹目录内移除后再次运行即可
 '''
 
+
 import os
 
 import idlelib.calltip
@@ -72,7 +73,7 @@ class MyEditorWindow(EditorWindow):
         self.after_close = []
 
         text = self.text
-        text.bind("<<save-window>>", self.save) # fix all event handle in this class.
+        text.bind('<<save-window>>', self.save) # fix all event handle in this class.
         text.bind('<F12>', self.Test)
 
         self.load_idlexx_extensions()
@@ -109,7 +110,7 @@ class MyEditorWindow(EditorWindow):
                 try:
                     self.load_extension(name) # TODO 支持任意位置文件导入
                 except Exception as e:
-                    print("Failed to import IDLEXX extension: %s" % name)
+                    print('Failed to import IDLEXX extension: %s' % name)
                     import traceback
                     traceback.print_exc()
 
