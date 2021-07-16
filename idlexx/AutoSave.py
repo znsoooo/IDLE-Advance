@@ -13,6 +13,7 @@ TICK = 7000
 
 class AutoSave:
     def __init__(self, parent):
+        self.text = parent.text
         self.root = parent.root
         self.io = parent.io
         self.get_saved = parent.get_saved # function
@@ -51,6 +52,11 @@ class AutoSave:
     def FakeLoadFile(self, filename_bak): # is that too.. dirty?
         fake = lambda *args: None
         temp = self.io.set_filename, self.io.reset_undo, self.io.updaterecentfileslist
-        self.io.set_filename, self.io.reset_undo, self.io.updaterecentfileslist = fake, fake, fake
+        self.io.set_filename = self.io.reset_undo = self.io.updaterecentfileslist = fake
+
+        self.text.undo_block_start()
+        self.text.insert('1.0', '') # In order to undo, the cursor can move to the top.
         self.io.loadfile(filename_bak)
+        self.text.undo_block_stop()
+
         self.io.set_filename, self.io.reset_undo, self.io.updaterecentfileslist = temp

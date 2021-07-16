@@ -67,7 +67,7 @@ class RecentSaved:
             cur = ret[1]
             text = self.text
             text.mark_set('insert', cur)
-            text.see(cur)
+            text.see('insert linestart') # See line start to prevent XScrollBar at right.
             text.tag_remove('sel', '1.0', 'end')
             text.tag_add('sel', 'insert linestart', 'insert linestart+1l')
         else:

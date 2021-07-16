@@ -1,5 +1,9 @@
 '''文本索引转换函数'''
 
+jn = lambda x,y: '%i.%i'%(x,y)
+sp = lambda c: eval(c.replace('.',','))
+
+
 def Cur2Lc(cur):
     return tuple(map(int, cur.split('.')))
 

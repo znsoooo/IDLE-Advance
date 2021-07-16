@@ -1,6 +1,7 @@
 '''交换复制'''
 
 # TODO 改为Ctrl-V的时候交换
+# TODO Shell中没有标色
 
 TAG = 'BREAK'
 
