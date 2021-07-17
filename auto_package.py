@@ -1,3 +1,5 @@
+# TODO 增加右键菜单和拖拽启动打包
+
 import os
 import time
 import zipfile
