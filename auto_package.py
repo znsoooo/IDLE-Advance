@@ -37,6 +37,6 @@ compress(pkg = 'idlexx',
          ignore = (
              'idlexx/.idea',
              'idlexx/__pycache__',
-             'idlexx/test/__pycache__',
+             'idlexx/scripts/__pycache__',
              )
          )

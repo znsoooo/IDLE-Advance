@@ -1,6 +1,11 @@
 '''清空Shell'''
 
 
+if __name__ == '__main__':
+    import __init__
+    __init__.test_shell(__file__)
+
+
 # TODO 增加菜单 'Clear Shell Window'
 
 from idlelib.pyshell import PyShell

@@ -1,6 +1,7 @@
 '''搜索替换工具条'''
 
 # TODO 处理好和纵向滚动条的相对位置问题
+# TODO shell中的stdout无法匹配
 
 
 if __name__ == '__main__':
@@ -10,7 +11,14 @@ if __name__ == '__main__':
 
 import re
 import tkinter as tk
-from idlexx.test.util import Pos2Cur, Cur2Pos, SelectSpan # TODO 相对导入问题
+
+
+def SelectSpan(text, span, ins):
+    c1, c2 = '1.0+%dc' % span[0], '1.0+%dc' % span[1]
+    text.tag_remove('sel', '1.0', 'end')
+    text.tag_add('sel', c1, c2)
+    text.mark_set('insert', [c1, c2][ins])
+    text.see(c1)
 
 
 def PrepFind(s, pat, repl, isre=False, case=True, word=False):
@@ -89,18 +97,18 @@ class ReplaceBar(tk.Frame):
 
         pat, repl = PrepFind(s, pat, repl, self.revar.get(), self.casevar.get(), self.wordvar.get())
         matchs = [m.span() for m in re.finditer(pat, s)]
-        self.tip.config(text=' Match: %d'%len(matchs))
+        self.tip.config(text=' Match: %d' % len(matchs))
         for p1, p2 in matchs:
-            self.text.tag_add('hit', Pos2Cur(s, p1), Pos2Cur(s, p2))
+            self.text.tag_add('hit', '1.0+%dc' % p1, '1.0+%dc' % p2)
 
         return matchs, s, pat, repl
 
     def Highlight(self):
         # TODO 未完成
         matchs = [m.span() for m in re.finditer(pat, s)]
-        self.tip.config(text=' Match: %d'%len(matchs))
+        self.tip.config(text=' Match: %d' % len(matchs))
         for p1, p2 in matchs:
-            self.text.tag_add('hit', Pos2Cur(s, p1), Pos2Cur(s, p2))
+            self.text.tag_add('hit', '1.0+%dc' % p1, '1.0+%dc' % p2)
 
     def View(self, next):
         '''next: 1 -> forward, 0 -> backward'''
@@ -108,7 +116,7 @@ class ReplaceBar(tk.Frame):
         self.backvar.set(not next)
         matchs, s, pat, repl = self.Find()
         if matchs:
-            ins = Cur2Pos(s, self.text.index('insert'))
+            ins = len(self.text.get('1.0', 'insert')) # cursor offset
             now = sorted([p1 for p1, p2 in matchs] + [ins]).index(ins) - 1
             new = (now+next) % len(matchs)
             SelectSpan(self.text, matchs[new], next)

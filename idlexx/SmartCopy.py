@@ -1,7 +1,4 @@
-'''
-shell-only
-仅拷贝Shell的代码
-'''
+'''仅拷贝Shell的代码'''
 
 # TODO 添加顶部菜单
 

@@ -3,6 +3,12 @@
 # TODO 改为Ctrl-V的时候交换
 # TODO Shell中没有标色
 
+
+if __name__ == '__main__':
+    import __init__
+    __init__.test_editor(__file__)
+
+
 TAG = 'BREAK'
 
 class SwapCopy:

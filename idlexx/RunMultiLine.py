@@ -1,5 +1,11 @@
 '''Shell多行运行'''
 
+
+if __name__ == '__main__':
+    import __init__
+    __init__.test_shell(__file__)
+
+
 # TODO 自动格式化代码之前的空格
 # TODO 增加到菜单（开关）
 

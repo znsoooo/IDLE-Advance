@@ -32,7 +32,7 @@ class FileManager(tk.Menu):
         self.add_command(label='Insert Filename', command=text_insert("'%s'"%basename(n)))
         self.add_command(label='Insert Dirname',  command=text_insert("r'%s'"%dirname(n)))
         self.add_separator()
-        self.add_command(label='Open in Explorer', command=lambda: subprocess.Popen('explorer %s'%dirname(n)))
+        self.add_command(label='Open in Explorer', command=lambda: subprocess.Popen('explorer /select, "%s"'%n))
         self.add_command(label='Open in CMD',      command=lambda: os.system('start'))
         # self.add_command(label='Run in CMD',       command=lambda: os.system('start "%s"'%io.filename)) # TODO
         self.add_separator()

@@ -68,8 +68,8 @@ class MyEditorWindow(EditorWindow):
 
         self.make_rmenu() # make "self.rmenu"
 
-        self.after_copy = []
-        self.after_save = []
+        self.before_copy = []
+        self.after_save  = []
         self.after_close = []
 
         text = self.text
@@ -81,10 +81,13 @@ class MyEditorWindow(EditorWindow):
         # 最近保存 TODO 无法在激活菜单时更新
         # self.menu_rc = RecentClosed(self)
 
-    def copy(self, event): # TODO 没有对应剪切
-        super().copy(event)
-        for fun in self.after_copy:
-            fun()
+    def cut(self, event):
+        [f() for f in self.before_copy] # same as `copy`
+        return super().cut(event)
+
+    def copy(self, event):
+        [f() for f in self.before_copy]
+        return super().copy(event)
 
     def _close(self):
         print('handle with edit _close:', self.io.filename)
@@ -94,19 +97,17 @@ class MyEditorWindow(EditorWindow):
     def close(self):
         # "<<close-window>>"事件不命中点击窗口关闭事件
         print('handle with edit close:', self.io.filename)
-        for fun in self.after_close:
-            fun()
+        [f() for f in self.after_close]
         super().close()
 
     def save(self, e):
         self.io.save(e)
-        for fun in self.after_save:
-            fun()
+        [f() for f in self.after_save]
 
     def load_idlexx_extensions(self):
         for file in EXTENSIONS:
             name, ext = os.path.splitext(os.path.basename(file))
-            if ext == '.py' and name != '__init__':
+            if ext == '.py' and name not in ['__init__', 'run']:
                 try:
                     self.load_extension(name) # TODO 支持任意位置文件导入
                 except Exception as e:

@@ -14,6 +14,7 @@ from idlelib.textview import ViewWindow, Button  # Button is ttk.Button
 
 
 # TODO 支持选择py或全部格式文件
+# TODO 优先比对已经打开的文件（列表）
 
 def Comparing(parent, file1, file2):  # TODO 移植到不依赖输入，支持任意文件接口
     with open(file1, encoding='u8') as f:

@@ -1,7 +1,4 @@
-'''
-editor-only
-运行选中
-'''
+'''运行选中'''
 
 if __name__ == '__main__':
     import __init__

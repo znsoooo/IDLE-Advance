@@ -1,0 +1,1 @@
+createobject("wscript.shell").run("pythonw run.py")
