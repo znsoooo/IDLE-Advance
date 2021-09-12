@@ -9,10 +9,10 @@
 
 
 ## What is it?
-- Add some useful extensions base on idlelib. Can be work on any platform where IDLE can be work.
-- See "~/idlealib/readme.md" to get spec of each extension. It is same as open script and watch \_\_doc\_\_.
-- Stop extension(s) by move script(s) to "nouse" folder.
-- It will generate ".pybak" file in script folder, and "recent-saved.lst" in userdir. Make sure no important files will be overwritten.
+- `IDLE-Advance`  add some useful extensions base on `idlelib`. It can be work on any platform where `IDLE` can be work.
+- See `~/idlealib/readme.md` to get spec of each extension. It is same as open each script and watch \_\_doc__.
+- Stop extension(s) by move script(s) to `nouse` folder.
+- It will generate `.pybak` file in script folder, and `recent-saved.lst` in userdir. Make sure no important files will be overwritten.
 
 
 ## How to use?
@@ -35,7 +35,7 @@ or upgrade:
 pip install idlea --upgrade
 ```
 
-install for drag-open feature:
+install `windnd` for drag-open feature:
 ```
 pip install windnd
 ```
@@ -58,8 +58,8 @@ python -m idlealib
 
 ### Run module in python
 ```
-import idlelib
-idlelib.run()
+import idlealib
+idlealib.run()
 ```
 
 ### Run unit test of one extension
@@ -74,12 +74,13 @@ Move stopped script file to `~/nouse` folder and restart `IDLE-Advance`.
 ### Quick set
 Make shortcut to Desktop and Startup Menu.  
 Open the GUI config helper and setting:
+
 ```
 ~/idlealib/scripts/context_helper.pyw
 ```
 
 ### Make shortcut
-Make shortcut of "\~/idlealib/\_\_main\_\_.py" to Desktop or Startup Menu folder or anywhere.
+Make shortcut of `~/idlealib/__main__.py` to Desktop or Startup Menu folder or anywhere.
 
 ### Add to right-click menu (only windows)
 Create `path` in Regedit:
@@ -101,10 +102,35 @@ and set `value` as:
 
 
 ## 运行方法
-- __平台：__ Windows/Python3.6 （其他平台未测试，但是计划支持Windows/Linux/macOS和py3.4以上的版本）
+- __平台：__ Windows/Python3.6 （其他平台未测试，但是计划支持Windows/Linux/macOS和Python3.4以上的版本）
 - __依赖：__ 可选择地安装windnd库，增加拖拽脚本文件到窗口即可打开的快捷操作，不安装此依赖也不影响整体运行
 - __使用：__ 用python启动run.py文件，随后在此界面上操作打开其他的脚本文件即可
 - __功能：__ 见后文todolist，实现的功能已经标记，剩余部分争取在1年之内完成
+
+## 关于项目
+
+### 笔者的话
+
+- 本项目（IDLE-Advance）和另一个IDLEX的开发项目（ http://idlex.sourceforge.net ）没有关联！
+- 由于该项目停止维护已久（2012年），并且该项目使用者的主要功能提升是增加了可以显示代码行号。
+- 但是我认为IDLE本来在窗口的右下角就有显示行号，甚至在新版的python中，可选的显示行号功能直接增加为了新的feature（py3.9）。
+- 所以笔者不在前人的轮子基础上继续修改，而是选择重新造一个轮子。
+
+
+### 项目目标
+
+- 众所周知，Python安装自带IDLE，是一个轻量级的编辑器，比命令行的python和记事本打开修改py文件的调试效率高了无数倍，甚至还有断点和单步调试的功能。
+- 但是那么多人使用PyCharm等第三方编译环境也不是没有道理的，PyCharm中的很多便捷操作确实很实用，但是毕竟PyCharm实在是太大了（300MB+）。
+- 抱着IDLE发展了20+年，也一直有人在用的打算，这个轮子应该不会马上被抛弃。增强IDLE的功能，通过一些简单但实用的功能，增加IDLE的生命力，让坚守者可以坚持得更久一点（？）。
+- 本工程代码中有大量的“TODO”标记，如果希望贡献意见，可以在GitHub上提交修改。不过GitHub我不太会用，修改代码前最好留言说明，或者发送给我邮件：11313213@qq.com ，非常感谢您的贡献！
+
+
+### 使用方法
+
+- 本代码运行需保证已经安装Python和IDLE，新增方法采用hack进原idlelib库的方法，所以除了增加部分功能完全没有影响IDLE的原始功能，不需要改变任何idlelib的原始代码即可运行。
+- 原始IDLE实现右键即可通过IDLE打开的方法，实际是是通过添加右键菜单转义为将idlelib库通过带参数运行的方式启动。本作并不想采用创新的方法重新造轮子，所以为了修改只需要将原来的idlelib换成idlealib即可改变右键编辑的功能。
+- 或者可以直接使用python运行本代码，会启动shell，然后打开后续的.py脚本文件可以实现相同的效果。
+- 所有的方法都展示在菜单栏最后一个增加的Advance项目下，以供快速使用。
 
 
 ## Todolist
@@ -181,29 +207,6 @@ and set `value` as:
 - [ ] 注释后移动到下一行
 - [ ] help查看器
 - [ ] Shell自由编辑模式（F12）
-
-
-## 关于项目
-
-### 笔者的话
-- 本项目（IDLE-Advance）和另一个IDLEX的开发项目（ http://idlex.sourceforge.net ）没有关联！
-- 由于该项目停止维护已久（2012年），并且该项目使用者的主要功能提升是增加了可以显示代码行号。
-- 但是我认为IDLE本来在窗口的右下角就有显示行号，甚至在新版的python中，可选的显示行号功能直接增加为了新的feature（py3.9）。
-- 所以笔者不在前人的轮子基础上继续修改，而是选择重新造一个轮子。
-
-
-### 项目目标
-- 众所周知，Python安装自带IDLE，是一个轻量级的编辑器，比命令行的python和记事本打开修改py文件的调试效率高了无数倍，甚至还有断点和单步调试的功能。
-- 但是那么多人使用Pycharm等第三方编译环境也不是没有道理的，Pycharm中的很多便捷操作确实很实用，但是毕竟pycharm实在是太大了（300MB+）。
-- 抱着IDLE发展了20+年，也一直有人在用的打算，这个轮子应该不会马上被抛弃。增强IDLE的功能，通过一些简单但实用的功能，增加IDLE的生命力，让坚守者可以坚持得更久一点（？）。
-- 本工程代码中有大量的“TODO”标记，如果希望贡献意见，可以在GitHub上提交修改。不过GitHub我不太会用，修改代码前最好留言说明，或者发送给我邮件：11313213@qq.com ，非常感谢您的贡献！
-
-
-### 使用方法
-- 本代码运行需保证已经安装Python和IDLE，新增方法采用hack进原idlelib库的方法，所以除了增加部分功能完全没有影响IDLE的原始功能，不需要改变任何idlelib的原始代码即可运行。
-- 原始IDLE实现右键即可通过IDLE打开的方法，实际是是通过添加右键菜单转义为将idlelib库通过带参数运行的方式启动。本作并不想采用创新的方法重新造轮子，所以为了修改只需要将原来的idle换成idlexx即可改变右键编辑的功能。
-- 或者可以直接使用python运行本代码，会启动shell，然后打开后续的.py脚本文件可以实现相同的效果。
-- 所有的方法都展示在菜单栏最后一个增加的Advance项目下，以供快速使用。
 
 
 ## 他山之石
