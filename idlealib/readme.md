@@ -1,8 +1,13 @@
+# Specification of extensions
+
 - __init__.py
-运行run.py获得一个加载所有插件的IDLE-Advance的示例文件
-运行__init__.py获得一个打开自身脚本并加载所有插件的editor的例子
-分别运行idlexx目录下的扩展文件，可以得到一个打开自身的editor的例子（有的是shell的例子）
-如果需要个别扩展不需要加载，将对应的文件从文件夹目录内移除后再次运行即可
+运行__main__.py获得一个加载所有插件的IDLE-Advance的示例文件。
+运行__init__.py获得一个打开自身脚本并加载所有插件的editor的例子。
+分别运行idlealib目录下的扩展文件，可以得到一个打开自身的editor或shell的例子。
+如果需要停用部分扩展，将对应的脚本移出目录后重启IDLE即可。
+
+- __main__.py
+主程序入口
 
 - AutoReload.py
 重载文件
@@ -37,6 +42,9 @@
 - RecentClipboard.py
 历史剪切板
 
+- RecentClosed.py
+最近关闭列表
+
 - RecentSaved.py
 位置记录
 
@@ -69,6 +77,9 @@ Shell多行运行
 
 - SwapCopy.py
 交换复制
+
+- TimeTag.py
+插入时间戳注释
 
 - WindowManager.py
 窗口操作

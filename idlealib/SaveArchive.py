@@ -20,6 +20,8 @@ def UniqueFile(file):
 
 class SaveArchive:
     def __init__(self, parent):
+        return  # TODO too much backup files.
+
         self.io = parent.io
         parent.after_save.append(self.Saving)
 

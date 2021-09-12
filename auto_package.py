@@ -1,42 +1,34 @@
 # TODO 增加右键菜单和拖拽启动打包
 
 import os
+import glob
 import time
 import zipfile
+
 
 def mark(target):
     tt = time.strftime('.%Y%m%d_%H%M%S')
     base, ext = os.path.splitext(target)
     os.rename(target, base + tt + ext)
 
-def walk(paths):
+
+def compress(paths, except_key=()):
+    save_name = os.path.splitext(paths[0])[0] + time.strftime('.%Y%m%d_%H%M%S.zip')
+    zip = zipfile.ZipFile(save_name, 'w', zipfile.ZIP_DEFLATED)
     for path in paths:
         if os.path.isfile(path):
-            yield path
-        elif os.path.isdir(path):
-            for root, folders, files in os.walk(path):
-                for file in files:
-                    yield os.path.join(root, file)
-
-def compress(pkg, paths=(), ignore=()):
-    save_name = pkg + time.strftime('.%Y%m%d_%H%M%S.zip')
-    zip = zipfile.ZipFile(save_name, 'w', zipfile.ZIP_DEFLATED)
-    ex = list(walk(ignore))
-    for file in walk(paths):
-        if all(not os.path.samefile(f1, file) for f1 in ex):
-            zip.write(file, file)
+            zip.write(path, path)
+        else:
+            for file in glob.iglob('%s/**' % path, recursive=True):
+                if all(key not in file for key in except_key):
+                    zip.write(file, file)
     zip.close()
 
 
-# mark('idlexx.zip')
+# mark('idlealib.zip')
 
-compress(pkg = 'idlexx',
-         paths = (
-             'idlexx',
-             ),
-         ignore = (
-             'idlexx/.idea',
-             'idlexx/__pycache__',
-             'idlexx/scripts/__pycache__',
-             )
-         )
+lst = [file for file in os.listdir() if os.path.isfile(file) and not file.startswith('test') and not file.endswith('.zip')]
+print(lst)
+
+compress(('idlealib', *lst),
+         except_key=('__pycache__',))

@@ -41,7 +41,7 @@ class FileManager(tk.Menu):
 
         text.bind('<F2>', lambda e: self.Rename(text, io))
 
-        parent.menudict['advance'].insert_cascade(3, label='File Manager', menu=self)
+        parent.amenu.insert_cascade(3, label='File Manager', menu=self)
 
     def Rename(self, text, io):
         basename2 = basename(io.filename)

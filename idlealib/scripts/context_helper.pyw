@@ -118,7 +118,7 @@ def Remove():
 def Switch(*_):
     id = options.index(v0.get())
     exe = v1.get()
-    src = os.path.abspath('../run.py')
+    src = os.path.abspath('../__main__.py')
     cmd = '"%s" "%s"' % (exe, src)
     s2 = s3 = s4 = ''
     if id == 1:

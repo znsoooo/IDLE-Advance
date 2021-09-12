@@ -10,7 +10,6 @@ if __name__ == '__main__':
 
 import os
 import csv
-# import tkinter as tk
 from idlelib.config import idleConf
 
 rc_path = os.path.join(idleConf.userdir, 'recent-saved.lst')
@@ -82,29 +81,3 @@ class RecentSaved:
 
     def OnClose(self):
         self.OnSave(False)
-
-
-# class RecentClosed(tk.Menu): # TODO 不是很理想
-#     def __init__(self, parent):
-#         tk.Menu.__init__(self, parent.menubar, tearoff=0, takefocus=1)
-#         self.parent = parent
-#         self.data = []
-#         self.Update() # TODO 无法做到每次点击窗口时更新
-#         self.parent.menubar.bind('<Unmap>', print)
-#         parent.menudict['advance'].insert_cascade(3, label='Recent Edit Files', menu=self)
-#
-#     def Update(self, new_file=None): # TODO 排除已打开文件
-#         "Load and update the recent files list and menus"
-#         rf_list = ReadData()
-#         ulchars = "1234567890ABCDEFGHIJK"
-#         rf_list = rf_list[0:len(ulchars)]
-#         self.delete(0, 'end')  # clear, and rebuild:
-#         for i, (cur, file_name) in enumerate(rf_list):
-#             callback = self.Callback(file_name)
-#             self.add_command(label=ulchars[i] + " " + file_name, command=callback, underline=0)
-#
-#     def Callback(self, file):
-#         def f():
-#             self.parent.io.open(editFile=file)
-#         return f
-

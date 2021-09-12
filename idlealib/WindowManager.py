@@ -16,7 +16,7 @@ class WindowManager(tk.Menu):
         self.parent = parent
         self.MakeMenu()
         self.Binding()
-        parent.menudict['advance'].insert_cascade(3, label='Window Manager', menu=self)
+        parent.amenu.insert_cascade(3, label='Window Manager', menu=self)
 
     def GetFileList(self):
         filename = self.parent.io.filename

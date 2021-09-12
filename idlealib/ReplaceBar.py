@@ -42,6 +42,8 @@ class ReplaceBar(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent.text_frame)
 
+        self.show = True
+
         self.text = parent.text
 
         # TODO 从idle中获取设置
@@ -59,24 +61,41 @@ class ReplaceBar(tk.Frame):
         self.wordvar.trace('w', self.Setting)
         self.backvar.trace('w', self.Setting)
 
+        t1 = tk.Entry(self, width=8, textvariable=self.patvar)
+        t2 = tk.Entry(self, width=8, textvariable=self.replvar, validatecommand=self.Find)
         tk.Label(self, text='Find:').pack(side='left')
-        tk.Entry(self, width=8, textvariable=self.patvar).pack(side='left', fill='x', expand=True)
+        t1.pack(side='left', fill='x', expand=True)
         tk.Label(self, text='Repl:').pack(side='left')
-        tk.Entry(self, width=8, textvariable=self.replvar, validatecommand=self.Find).pack(side='left', fill='x', expand=True)
+        t2.pack(side='left', fill='x', expand=True)
 
         self.tip = tk.Label(self, text=' Match: 0')
         self.tip.pack(side='left')
 
-        tk.Checkbutton(self, text='Re',   variable=self.revar)  .pack(side='left')
-        tk.Checkbutton(self, text='Case', variable=self.casevar).pack(side='left')
-        tk.Checkbutton(self, text='Word', variable=self.wordvar).pack(side='left')
+        tk.Checkbutton(self, text='Cc', variable=self.casevar).pack(side='left')
+        tk.Checkbutton(self, text='Wd', variable=self.wordvar).pack(side='left')
+        tk.Checkbutton(self, text='Re', variable=self.revar)  .pack(side='left')
 
         tk.Button(self, relief='groove', text='<<', command=lambda: self.View(0)).pack(side='left')
         tk.Button(self, relief='groove', text='>>', command=lambda: self.View(1)).pack(side='left')
         tk.Button(self, relief='groove', text='Replace', command=self.Replace).pack(side='left')
         tk.Button(self, relief='groove', text='Replace All', command=self.ReplaceAll).pack(side='left')
 
-        self.pack(fill='x', side='bottom')
+        self.text.bind('<<replace-bar-show>>', self.Flip)
+        self.text.event_add('<<replace-bar-show>>', '<Key-Escape>') # add event but not clear exist bindings.
+        t1.bind('<Escape>', self.Flip)
+        t2.bind('<Escape>', self.Flip)
+
+        self.Flip(-1)
+
+    def Flip(self, evt):
+        self.show = not self.show
+        if self.show:
+            self.pack(fill='x', side='bottom')
+            self.Find()
+        else:
+            self.forget()
+            self.text.tag_remove('hit', '1.0', 'end')
+            self.text.focus()
 
     def Setting(self, *args):
         self.Find()

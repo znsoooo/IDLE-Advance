@@ -47,9 +47,10 @@ class CompareFile:
     def __init__(self, parent):
         self.text = parent.text
         self.io = parent.io
-        self.text.bind('<<compare-file>>', self.OnCompareFile)
 
-    def OnCompareFile(self, e):
+        parent.add_adv_menu('Compare to File', self.OnCompareFile, sp=True)
+
+    def OnCompareFile(self):
         file1 = self.io.filename
         file2 = self.io.askopenfile()
         if file2:

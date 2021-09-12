@@ -1,3 +1,2 @@
-from idlexx import run
-
-run()
+import idlealib
+idlealib.run()

@@ -28,10 +28,12 @@ def PrintTags(text):
 
 
 if __name__ == '__main__':
-    FindKey('hello......')
+    # FindKey('hello......')
 
-    FindKey(r'.*\bCopy\b.*')
-    FindKey(r'.*\b\.tcl\b.*', path='lib/tkinter')
+    FindKey('.*Escape.*')
+
+    # FindKey(r'.*\bCopy\b.*')
+    # FindKey(r'.*\b\.tcl\b.*', path='lib/tkinter')
 
     # FindKey(r'.*EditorWindow.*')
 

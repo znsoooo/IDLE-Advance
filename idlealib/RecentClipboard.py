@@ -23,7 +23,7 @@ class RecentClipboard(tk.Menu):
         self.Add()
 
         parent.rmenu.insert_cascade(3, label='History', menu=self)
-        parent.menudict['advance'].insert_cascade(3, label='Paste from History', menu=self)
+        parent.amenu.insert_cascade(3, label='Paste from History', menu=self)
 
         try:
             self.Add(parent.top.clipboard_get())

@@ -48,10 +48,12 @@ class SahreQRCode:
 
         self.text.bind('<<share-qrcode>>', self.Post)
 
-        parent.rmenu.insert_separator('end')
-        parent.rmenu.insert_command('end', label='Share Code', command=self.Post)
+        parent.rmenu.add_separator()
+        parent.rmenu.add_command(label='Share Code', command=self.Post)
 
-    def Post(self, e=-1):
+        parent.add_adv_menu('Share QRCode', self.Post, sp=True)
+
+    def Post(self):
         s = self.text.get('sel.first', 'sel.last') or self.text.get('1.0', 'end')
         s = s[:2000] # TODO 过长保护提示
         brief = s if len(s) < 21 else s[:10] + ' ... ' + s[-10:]

@@ -39,14 +39,17 @@ def GetCodes(text):
 
 class SmartCopy:
     def __init__(self, parent):
+        if not isinstance(parent, PyShell):
+            return
+
         self.text = parent.text
         self.io = parent.io
         self.flist = parent.flist
-        if isinstance(parent, PyShell):
-            n = 5
-            parent.rmenu.insert_separator(n)
-            parent.rmenu.insert_command(n, label='Export to File', command=self.New)
-            parent.rmenu.insert_command(n, label='Copy Code', command=self.Copy)
+
+        n = 5
+        parent.rmenu.insert_separator(n)
+        parent.rmenu.insert_command(n, label='Export to File', command=self.New)
+        parent.rmenu.insert_command(n, label='Copy Code', command=self.Copy)
 
     def Copy(self):
         self.text.clipboard_clear()

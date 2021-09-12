@@ -1,8 +1,14 @@
+# Copyright (c) 2021 Lishixian (znsoooo). All Rights Reserved.
+#
+# Distributed under MIT license.
+# See file LICENSE for detail or copy at https://opensource.org/licenses/MIT
+
+
 '''
-运行run.py获得一个加载所有插件的IDLE-Advance的示例文件
-运行__init__.py获得一个打开自身脚本并加载所有插件的editor的例子
-分别运行idlexx目录下的扩展文件，可以得到一个打开自身的editor的例子（有的是shell的例子）
-如果需要个别扩展不需要加载，将对应的文件从文件夹目录内移除后再次运行即可
+运行__main__.py获得一个加载所有插件的IDLE-Advance的示例文件。
+运行__init__.py获得一个打开自身脚本并加载所有插件的editor的例子。
+分别运行idlealib目录下的扩展文件，可以得到一个打开自身的editor或shell的例子。
+如果需要停用部分扩展，将对应的脚本移出目录后重启IDLE即可。
 '''
 
 
@@ -30,6 +36,26 @@ class Calltip(idlelib.calltip.Calltip):
 idlelib.calltip.Calltip = Calltip
 
 
+
+import keyword
+import idlelib.autocomplete
+
+
+class MyAutoComplete(idlelib.autocomplete.AutoComplete):
+    def fetch_completions(self, what, mode):
+        ret = super().fetch_completions(what, mode)
+        if mode == idlelib.autocomplete.COMPLETE_ATTRIBUTES and what == '':
+            for lst in ret[:2]:
+                lst.extend(v for v in keyword.kwlist if v not in lst) # `None/True/False` are repetitive.
+                lst.sort()
+        return ret
+
+
+idlelib.autocomplete.AutoComplete = MyAutoComplete
+
+
+
+
 def FixPath():
     # To fix open shell (call run() without sys.argv) or self.load_extension(name) will not work.
     import sys
@@ -46,17 +72,9 @@ from idlelib.mainmenu import menudefs
 # editor.EditorWindow -> outwin.OutputWindow -> pyshell.PyShell
 
 
-mymenudef = ('advance', [
-    ('Back', '<<my-function>>'),
-    ('Forward', '<<my-function>>'),
-    None,
-    None,
-    ('Compare to File', '<<compare-file>>'),
-    None,
-    ('Share QRCode', '<<share-qrcode>>'),
-    ])
+mymenudef = ('advance', [])
 
-menudefs.append(mymenudef)
+menudefs.append(('advance', []))
 
 
 class MyEditorWindow(EditorWindow):
@@ -66,6 +84,7 @@ class MyEditorWindow(EditorWindow):
 
         EditorWindow.__init__(self, *args)
 
+        self.amenu = self.menudict['advance']
         self.make_rmenu() # make "self.rmenu"
 
         self.before_copy = []
@@ -76,10 +95,9 @@ class MyEditorWindow(EditorWindow):
         text.bind('<<save-window>>', self.save) # fix all event handle in this class.
         text.bind('<F12>', self.Test)
 
-        self.load_idlexx_extensions()
+        self.recent_files_menu['postcommand'] = self.update_recent_files_list # fix list not refresh when open another IDLE.
 
-        # 最近保存 TODO 无法在激活菜单时更新
-        # self.menu_rc = RecentClosed(self)
+        self.load_adv_extensions()
 
     def cut(self, event):
         [f() for f in self.before_copy] # same as `copy`
@@ -104,19 +122,32 @@ class MyEditorWindow(EditorWindow):
         self.io.save(e)
         [f() for f in self.after_save]
 
-    def load_idlexx_extensions(self):
+    def add_adv_menu(self, label, sub, index='end', sp=False):
+        menu = self.menudict['advance']
+        if sp and menu.index('end') is not None:
+            menu.insert_separator(index)
+        if callable(sub):
+            menu.insert_command(index, label=label, command=sub)
+        else:
+            menu.insert_cascade(index, label=label, menu=sub)
+
+    def load_adv_extensions(self):
         for file in EXTENSIONS:
             name, ext = os.path.splitext(os.path.basename(file))
-            if ext == '.py' and name not in ['__init__', 'run']:
+            if ext == '.py' and name not in ['__init__', '__main__']:
                 try:
                     self.load_extension(name) # TODO 支持任意位置文件导入
-                except Exception as e:
-                    print('Failed to import IDLEXX extension: %s' % name)
+                except:
+                    print('Failed to import IDLE-Adv extension: %s' % name)
                     import traceback
                     traceback.print_exc()
 
+        menu = self.menudict['advance']
+        if menu.type('end') == 'separator':
+            menu.delete('end')
+
     def Test(self, e):
-        print('editor ontest')
+        print('editor on test')
         print('mark_names:', self.text.mark_names())
         print('tag_names:', self.text.tag_names())
         print('functions:', ' '.join(v for v in dir(self.text) if 'tag' in v or 'mark' in v))
@@ -126,7 +157,7 @@ idlelib.editor.EditorWindow = MyEditorWindow
 from idlelib.pyshell import main  # must after hot patch
 
 
-def run(filename=None, exts=[]):
+def run(filename=None, exts=()):
     FixPath()
     EXTENSIONS.extend(exts)
     if not EXTENSIONS:
