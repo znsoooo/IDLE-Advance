@@ -1,85 +1,85 @@
 # Specification of extensions
 
-- __init__.py
-运行__main__.py获得一个加载所有插件的IDLE-Advance的示例文件。
-运行__init__.py获得一个打开自身脚本并加载所有插件的editor的例子。
-分别运行idlealib目录下的扩展文件，可以得到一个打开自身的editor或shell的例子。
+- __\_\_init\_\_.py__  
+运行__main__.py获得一个加载所有插件的IDLE-Advance的示例文件。  
+运行__init__.py获得一个打开自身脚本并加载所有插件的editor的例子。  
+分别运行idlealib目录下的扩展文件，可以得到一个打开自身的editor或shell的例子。  
 如果需要停用部分扩展，将对应的脚本移出目录后重启IDLE即可。
 
-- __main__.py
+- __\_\_main\_\_.py__  
 主程序入口
 
-- AutoReload.py
+- __AutoReload.py__  
 重载文件
 
-- AutoSave.py
+- __AutoSave.py__  
 自动备份
 
-- CalltipSelect.py
+- __CalltipSelect.py__  
 可选中函数提示
 
-- ClearShell.py
+- __ClearShell.py__  
 清空Shell
 
-- CompareFile.py
+- __CompareFile.py__  
 文本比较
 
-- CopyNoSelect.py
+- __CopyNoSelect.py__  
 当选区为空时复制/剪切复制当前行
 
-- CursorHistory.py
+- __CursorHistory.py__  
 光标记录
 
-- DragOpen.py
+- __DragOpen.py__  
 拖拽打开
 
-- FileManager.py
+- __FileManager.py__  
 文件操作
 
-- QuickSearch.py
+- __QuickSearch.py__  
 快速正反搜索
 
-- RecentClipboard.py
+- __RecentClipboard.py__  
 历史剪切板
 
-- RecentClosed.py
+- __RecentClosed.py__  
 最近关闭列表
 
-- RecentSaved.py
+- __RecentSaved.py__  
 位置记录
 
-- ReplaceBar.py
+- __ReplaceBar.py__  
 搜索替换工具条
 
-- RunMultiLine.py
+- __RunMultiLine.py__  
 Shell多行运行
 
-- RunSelected.py
+- __RunSelected.py__  
 运行选中
 
-- SahreQRCode.py
+- __SahreQRCode.py__  
 将选中代码转化为二维码
 
-- SaveArchive.py
+- __SaveArchive.py__  
 记录备份
 
-- ScrollHorizontal.py
+- __ScrollHorizontal.py__  
 横向滚动条
 
-- SmartCopy.py
+- __SmartCopy.py__  
 仅拷贝Shell的代码
 
-- SmartPairing.py
+- __SmartPairing.py__  
 匹配成对括号
 
-- SmartSelect.py
+- __SmartSelect.py__  
 智能选取
 
-- SwapCopy.py
+- __SwapCopy.py__  
 交换复制
 
-- TimeTag.py
+- __TimeTag.py__  
 插入时间戳注释
 
-- WindowManager.py
+- __WindowManager.py__  
 窗口操作

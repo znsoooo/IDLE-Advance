@@ -9,10 +9,10 @@ for file in os.listdir():
         shutil.copy(file, 'idlealib/docs/' + file.lower())
 
 with open('VERSION.txt') as f:
-    version = f.read()
+    version = f.read().strip()
 
 with open('README.md', encoding='u8') as f:
-    long_description = f.read().strip()
+    long_description = f.read().replace('[x]', chr(9989)).replace('[ ]', chr(10062)) # ✅❎
 
 setuptools.setup(
     name='idlea',
