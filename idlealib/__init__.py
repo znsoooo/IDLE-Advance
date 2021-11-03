@@ -72,6 +72,15 @@ from idlelib.mainmenu import menudefs
 # editor.EditorWindow -> outwin.OutputWindow -> pyshell.PyShell
 
 
+def wrap_function(func, before=(), after=()):
+    def wrapper(*args, **kwargs):
+        [f() for f in before]
+        ret = func(*args, **kwargs)
+        [f() for f in after]
+        return ret
+    return wrapper
+
+
 mymenudef = ('advance', [])
 
 menudefs.append(('advance', []))
@@ -82,45 +91,35 @@ class MyEditorWindow(EditorWindow):
         if ('advance', 'Advance') not in self.menu_specs:
             self.menu_specs.append(('advance', 'Advance'))
 
-        EditorWindow.__init__(self, *args)
-
-        self.amenu = self.menudict['advance']
-        self.make_rmenu() # make "self.rmenu"
-
         self.before_copy = []
         self.after_save  = []
         self.after_close = []
 
+        # must before text binding, so before `EditorWindow.__init__()`
+        self.cut   = wrap_function(self.cut, before=self.before_copy)  # same as `copy`
+        self.copy  = wrap_function(self.copy, before=self.before_copy)
+        self.close = wrap_function(self.close, before=self.after_close)  # "<<close-window>>"事件不命中点击窗口关闭事件
+
+        EditorWindow.__init__(self, *args)
+
+        # F5保存时，调用idlelib.runscript.getfilename()，设置自动保存时进入self.editwin.io.save(None)进行保存
+        self.io.save = wrap_function(self.io.save, after=self.after_save)
+
+        self.amenu = self.menudict['advance']
+        self.make_rmenu() # make "self.rmenu"
+
         text = self.text
-        text.bind('<<save-window>>', self.save) # fix all event handle in this class.
+
         text.bind('<F12>', self.Test)
 
-        self.recent_files_menu['postcommand'] = self.update_recent_files_list # fix list not refresh when open another IDLE.
+        self.recent_files_menu['postcommand'] = self.update_recent_files_list  # fix list not refresh when open another IDLE.
 
         self.load_adv_extensions()
-
-    def cut(self, event):
-        [f() for f in self.before_copy] # same as `copy`
-        return super().cut(event)
-
-    def copy(self, event):
-        [f() for f in self.before_copy]
-        return super().copy(event)
 
     def _close(self):
         print('handle with edit _close:', self.io.filename)
         super()._close()
         # raise # TODO 是否还有别的方法阻止清空剪切
-
-    def close(self):
-        # "<<close-window>>"事件不命中点击窗口关闭事件
-        print('handle with edit close:', self.io.filename)
-        [f() for f in self.after_close]
-        super().close()
-
-    def save(self, e):
-        self.io.save(e)
-        [f() for f in self.after_save]
 
     def add_adv_menu(self, label, sub, index='end', sp=False):
         menu = self.menudict['advance']

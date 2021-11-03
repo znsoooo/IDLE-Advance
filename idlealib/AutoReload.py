@@ -40,3 +40,5 @@ class AutoReload:
             self.mt = mt  # 激活窗口最多只提示一次，下一次提示在本地文件再次发生修改
             if askyesno('Refresh?', 'Find text changed, do you need to refresh?', parent=self.root):  # TODO 参考notepad的窗口提示文本
                 self.ReloadFile()
+            else:
+                pass # todo 设置为未保存状态
