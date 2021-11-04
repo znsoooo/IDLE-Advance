@@ -14,9 +14,35 @@
 
 import os
 
+EXTENSIONS = []
+
+
+# - Functions ----------------------------------------
+
+
+def fix_path():
+    # To fix open shell (call run() without sys.argv) or self.load_extension(name) will not work.
+    import sys
+    path = os.path.dirname(__file__)
+    if path not in sys.path:
+        sys.path.insert(0, path)
+
+
+def wrap_function(func, before=(), after=()):
+    def wrapper(*args, **kwargs):
+        # print(func.__name__) # for test
+        [f() for f in before]
+        ret = func(*args, **kwargs)
+        [f() for f in after]
+        return ret
+    return wrapper
+
+
+# - Calltip ----------------------------------------
+
+
 import idlelib.calltip
 
-EXTENSIONS = []
 
 # idlelib.calltip._MAX_LINES = 999
 # idlelib.calltip._MAX_COLS = 999
@@ -36,6 +62,8 @@ class Calltip(idlelib.calltip.Calltip):
 idlelib.calltip.Calltip = Calltip
 
 
+# - AutoComplete ----------------------------------------
+
 
 import keyword
 import idlelib.autocomplete
@@ -54,36 +82,31 @@ class MyAutoComplete(idlelib.autocomplete.AutoComplete):
 idlelib.autocomplete.AutoComplete = MyAutoComplete
 
 
+# - IOBinding ----------------------------------------
 
 
-def FixPath():
-    # To fix open shell (call run() without sys.argv) or self.load_extension(name) will not work.
-    import sys
-    path = os.path.dirname(__file__)
-    if path not in sys.path:
-        sys.path.insert(0, path)
+import idlelib.iomenu
+from idlelib.iomenu import IOBinding
 
 
-import idlelib.editor
-from idlelib.editor import EditorWindow
-from idlelib.mainmenu import menudefs
+class MyIOBinding(IOBinding):
+    def __init__(self, editwin):
+        # F5保存时，调用idlelib.runscript.getfilename()，设置自动保存时进入self.editwin.io.save(None)进行保存
+        self.save = wrap_function(self.save, after=editwin.after_save)
+        IOBinding.__init__(self, editwin)
+
+
+idlelib.iomenu.IOBinding = MyIOBinding
+
+
+# - EditorWindow ----------------------------------------
+
 
 # editor.EditorWindow -> pyshell.PyShellEditorWindow
 # editor.EditorWindow -> outwin.OutputWindow -> pyshell.PyShell
 
-
-def wrap_function(func, before=(), after=()):
-    def wrapper(*args, **kwargs):
-        [f() for f in before]
-        ret = func(*args, **kwargs)
-        [f() for f in after]
-        return ret
-    return wrapper
-
-
-mymenudef = ('advance', [])
-
-menudefs.append(('advance', []))
+import idlelib.editor
+from idlelib.editor import EditorWindow
 
 
 class MyEditorWindow(EditorWindow):
@@ -102,19 +125,13 @@ class MyEditorWindow(EditorWindow):
 
         EditorWindow.__init__(self, *args)
 
-        # F5保存时，调用idlelib.runscript.getfilename()，设置自动保存时进入self.editwin.io.save(None)进行保存
-        self.io.save = wrap_function(self.io.save, after=self.after_save)
-
         self.amenu = self.menudict['advance']
         self.make_rmenu() # make "self.rmenu"
-
-        text = self.text
-
-        text.bind('<F12>', self.Test)
 
         self.recent_files_menu['postcommand'] = self.update_recent_files_list  # fix list not refresh when open another IDLE.
 
         self.load_adv_extensions()
+        self.text.bind('<F12>', self.test)
 
     def _close(self):
         print('handle with edit _close:', self.io.filename)
@@ -145,7 +162,7 @@ class MyEditorWindow(EditorWindow):
         if menu.type('end') == 'separator':
             menu.delete('end')
 
-    def Test(self, e):
+    def test(self, e):
         print('editor on test')
         print('mark_names:', self.text.mark_names())
         print('tag_names:', self.text.tag_names())
@@ -153,11 +170,16 @@ class MyEditorWindow(EditorWindow):
 
 
 idlelib.editor.EditorWindow = MyEditorWindow
+
+
+# - Main ----------------------------------------
+
+
 from idlelib.pyshell import main  # must after hot patch
 
 
 def run(filename=None, exts=()):
-    FixPath()
+    fix_path()
     EXTENSIONS.extend(exts)
     if not EXTENSIONS:
         EXTENSIONS.extend(file for file in os.listdir(os.path.dirname(__file__)))
