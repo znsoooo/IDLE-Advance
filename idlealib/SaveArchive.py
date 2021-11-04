@@ -10,7 +10,7 @@ import os
 import time
 
 
-def UniqueFile(path):
+def StampFile(path):
     root, file = os.path.split(path)
     name, ext = os.path.splitext(file)
     root2 = os.path.join(root, '.pybak')
@@ -20,13 +20,6 @@ def UniqueFile(path):
     file2 = os.path.join(root2, name + tag + ext)
     return file2
 
-    # n = 0
-    # while True:
-    #     n += 1
-    #     file2 = os.path.join(root2, '%s-%d%s' % (filename, n, ext))
-    #     if not os.path.exists(file2):
-    #         return file2
-
 
 class SaveArchive:
     def __init__(self, parent):
@@ -34,4 +27,4 @@ class SaveArchive:
         parent.after_save.append(self.Saving)
 
     def Saving(self):
-        self.io.writefile(UniqueFile(self.io.filename)) # todo 只有未保存的状态下保存才会保存副本
+        self.io.writefile(StampFile(self.io.filename)) # todo 只有未保存的状态下保存才会保存副本

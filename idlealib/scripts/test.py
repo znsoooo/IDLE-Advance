@@ -32,6 +32,8 @@ if __name__ == '__main__':
 
     # FindKey('.*Escape.*')
     FindKey('.*<<run-module>>.*')
+    FindKey('.*<<save-window>>.*')
+    FindKey('.*\.save\(.*')
 
     # FindKey(r'.*\bCopy\b.*')
     # FindKey(r'.*\b\.tcl\b.*', path='lib/tkinter')
