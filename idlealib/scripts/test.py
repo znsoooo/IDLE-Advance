@@ -5,19 +5,26 @@ import sys
 
 def lc(s):
     ss = s.split('\n')
-    cur = '%d.%d' % (len(ss), len(ss[-1]))
-    return cur
+    return len(ss), len(ss[-1])
 
 
-def FindKey(key, path='lib/idlelib'):
-    print('\nFindkey:\n"%s" in "%s":'%(key, path))
+def FindKey(key, path='lib/idlelib', easy=False):
+    print('\nFindkey:\n  "%s" in "%s":'%(key, path))
     for root, folders, files in os.walk(os.path.join(sys.base_prefix, path)):
         for file in files:
             if file.endswith('.py'):
                 with open(os.path.join(root, file), encoding='u8') as f:
                     s = f.read()
                 for m in re.finditer(key, s):
-                    print(file, lc(s[:m.start()]), m.group().strip())
+                    row, col = lc(s[:m.start()])
+                    file2 = os.path.join(root, file)
+                    if easy:
+                        row, col = lc(s[:m.start()])
+                        print('%s: %d.%d, %s' % (file, row, col, m.group().strip()))
+                    else:
+                        print('-' * 20)
+                        print('File "%s", line %d, col %d:' % (file2, row, col))
+                        print('  ' + m.group().strip())
     print()
 
 
@@ -32,8 +39,9 @@ if __name__ == '__main__':
 
     # FindKey('.*Escape.*')
     FindKey('.*<<run-module>>.*')
+    FindKey('.*<<run-module>>.*', easy=True)
     FindKey('.*<<save-window>>.*')
-    FindKey('.*\.save\(.*')
+    FindKey(r'.*\bmenudefs\b.*')
 
     # FindKey(r'.*\bCopy\b.*')
     # FindKey(r'.*\b\.tcl\b.*', path='lib/tkinter')
