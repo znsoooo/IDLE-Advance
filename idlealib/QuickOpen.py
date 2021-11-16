@@ -36,7 +36,7 @@ class QuickOpen:
 
 'F:\lsx\coding\idle\idlealib\scripts'
 'scripts\readme.md'
-"F:\lsx\中电联达\12S代码说明.docx"
+"F:\lsx\代码说明.docx"
 "notepad 1.txt"
 "C:\\"
 "cmd /k ipconfig"

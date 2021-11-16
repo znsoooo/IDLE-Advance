@@ -13,6 +13,7 @@
 
 
 import os
+import time
 
 EXTENSIONS = []
 
@@ -94,6 +95,11 @@ class MyIOBinding(IOBinding):
         # F5保存时，调用idlelib.runscript.getfilename()，设置自动保存时进入self.editwin.io.save(None)进行保存
         self.save = wrap_function(self.save, after=editwin.after_save)
         IOBinding.__init__(self, editwin)
+
+    def defaultfilename(self, mode="open"):
+        if not self.filename:
+            return self.dirname, time.strftime('Untitled_%Y%m%d_%H%M%S.py')
+        return super().defaultfilename(mode)
 
 
 idlelib.iomenu.IOBinding = MyIOBinding

@@ -38,10 +38,13 @@ if __name__ == '__main__':
     # FindKey('hello......')
 
     # FindKey('.*Escape.*')
-    FindKey('.*<<run-module>>.*')
-    FindKey('.*<<run-module>>.*', easy=True)
-    FindKey('.*<<save-window>>.*')
-    FindKey(r'.*\bmenudefs\b.*')
+    FindKey('.*ScriptBinding.*')
+
+    # FindKey('.*<<run-module>>.*')
+    # FindKey('.*<<run-module>>.*', easy=True)
+    #
+    # FindKey('.*<<save-window>>.*')
+    # FindKey(r'.*\bmenudefs\b.*')
 
     # FindKey(r'.*\bCopy\b.*')
     # FindKey(r'.*\b\.tcl\b.*', path='lib/tkinter')

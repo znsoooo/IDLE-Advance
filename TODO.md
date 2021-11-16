@@ -1,26 +1,16 @@
-
 ## Today
+- version自动编号增加
 
-- 修复ReplaceBar的搜索体验
-- 快速创建快捷方式
-- 自动保存untitled的内容
+### Features
+X 记录shell历史记录到文件
+X shell自由编辑模式（F12）
+
+### Fix
+- 快速创建快捷方式（context_helper.pyw）
 - 兼容py34
 - 修复自动括号匹配的使用体验
-- 删除shell一行
-
-
-## editor
-
-V 右键选中文本查看本地文件、打开所在文件夹
 - 内建搜索窗口不置顶
-- 比较选中的文本和剪切板内容
-
-
-## shell
-
-- 取消换行
-X 历史记录到文本
-X 自由编辑模式（F12）
+- 比较选中的文本和剪切板内容（CompareFile.py）
 
 
 ## TODO NOTE
