@@ -18,12 +18,18 @@ options = ('All Positions Below', 'Lnk: Desktop Shortcut', 'Lnk: Start Up Menu',
 # ---------------------------------------------------------------------------
 
 
-def MakeLink(folder, file, cmd):
-    os.popen('explorer "%s"' % folder)
-    top.clipboard_clear()
-    top.clipboard_append(cmd)
-    time.sleep(0.5)
-    showinfo('Info', 'Copy `cmd` and create shortcut by right click in opened explorer')
+def MakeLink(exe, folder, file, cmd):
+    try:
+        import winshell
+        root = os.path.dirname(exe)
+        path = os.path.join(folder, file)
+        winshell.CreateShortcut(path, exe, cmd, root, (root + r'\Lib\idlelib\Icons\idle.ico', 0))
+    except ImportError:
+        os.popen('explorer "%s"' % folder)
+        top.clipboard_clear()
+        top.clipboard_append('"%s" %s' % (exe, cmd))
+        time.sleep(0.5)
+        showinfo('Info', 'Copy `cmd` and create shortcut by right click in opened explorer')
 
 
 # ---------------------------------------------------------------------------
@@ -80,14 +86,13 @@ def Loop(fun):
 
 def Add():
     id = options.index(v0.get())
-    s2, s3, s4 = v2.get(), v3.get(), v4.get()
+    s1, s2, s3, s4 = v1.get(), v2.get(), v3.get(), v4.get()
     if id == 0:
         Loop(Add)
         return
     try:
         if id in [1, 2]: # lnk
-            p = os.path.join(s2, s3)
-            MakeLink(s2, s3, s4)
+            MakeLink(s1, s2, s3, s4)
         elif id in [3, 4]: # reg
             SetKey(s2, s3, s4)
     except Exception as e:
@@ -119,19 +124,18 @@ def Switch(*_):
     id = options.index(v0.get())
     exe = v1.get()
     src = os.path.abspath('../__main__.py')
-    cmd = '"%s" "%s"' % (exe, src)
     s2 = s3 = s4 = ''
     if id == 1:
         s2 = GetDir('Desktop')
         s3 = 'IDLE-Advance.lnk'
-        s4 = cmd
+        s4 = '"%s"' % src
     elif id == 2:
         s2 = GetDir('Programs')
         s3 = 'Python IDLE-Advance.lnk'
-        s4 = cmd
+        s4 = '"%s"' % src
     elif id == 3:
         s2 = r'HKEY_CURRENT_USER\Software\Classes\Python.File\Shell\Edit with IDLE-Adv\command'
-        s4 = cmd + ' "%L" %*'
+        s4 = '"{}" "{}" "%L" %*'.format(exe, src)
     elif id == 4:
         s2 = r'HKEY_CURRENT_USER\Software\Classes\.py\ShellNew'
         s3 = 'FileName'
@@ -175,8 +179,8 @@ if __name__ == '__main__':
     btn2.grid(row=0, column=3)
 
     for r, (name, var) in enumerate(zip(['exe', 'path', 'name', 'cmd'], [v1, v2, v3, v4])):
-        tk.Label(top, text=' %s: '%name).grid(row=r+1, column=0, sticky='e')
-        tk.Entry(top, textvariable=var) .grid(row=r+1, column=1, sticky='we', columnspan=3)
+        tk.Label(top, text=' %s: ' % name).grid(row=r+1, column=0, sticky='e')
+        tk.Entry(top, textvariable=var)   .grid(row=r+1, column=1, sticky='we', columnspan=3)
 
     Center(top)
 
