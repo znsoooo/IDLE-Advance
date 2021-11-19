@@ -7,12 +7,11 @@ if __name__ == '__main__':
 
 
 from tkinter.simpledialog import askstring
-from idlelib.pyshell import PyShell
 
 
 class RunArgs:
     def __init__(self, parent):
-        if isinstance(parent, PyShell):
+        if hasattr(parent, 'write'): # is shell?
             return
 
         self.text = parent.text

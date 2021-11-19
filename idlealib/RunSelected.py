@@ -6,12 +6,11 @@ if __name__ == '__main__':
 
 
 import tkinter as tk
-from idlelib.pyshell import PyShell
 
 
 class RunSelected(tk.Menu):
     def __init__(self, parent):
-        if isinstance(parent, PyShell):
+        if hasattr(parent, 'write'): # is shell?
             return
 
         tk.Menu.__init__(self, parent.menubar, tearoff=0)

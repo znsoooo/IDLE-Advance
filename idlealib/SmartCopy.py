@@ -8,9 +8,6 @@ if __name__ == '__main__':
     __init__.test_shell(__file__)
 
 
-from idlelib.pyshell import PyShell
-
-
 def GetCodes(text):
     if text.tag_ranges('sel'):
         sted = 'sel.first,sel.last'
@@ -39,7 +36,7 @@ def GetCodes(text):
 
 class SmartCopy:
     def __init__(self, parent):
-        if not isinstance(parent, PyShell):
+        if not hasattr(parent, 'write'): # is not shell?
             return
 
         self.text = parent.text

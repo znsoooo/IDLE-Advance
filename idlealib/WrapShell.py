@@ -6,12 +6,9 @@ if __name__ == '__main__':
     __init__.test_shell(__file__)
 
 
-from idlelib.pyshell import PyShell
-
-
 class WrapShell:
     def __init__(self, parent):
-        if isinstance(parent, PyShell):
+        if hasattr(parent, 'write'): # is shell?
             self.text = parent.per.text  # TODO 研究一下作用原理
 
             parent.rmenu.add_separator()

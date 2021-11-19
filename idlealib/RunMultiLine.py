@@ -10,12 +10,9 @@ if __name__ == '__main__':
 # TODO 增加到菜单（开关）
 
 
-from idlelib.pyshell import PyShell
-
-
 class RunMultiLine:
     def __init__(self, parent):
-        if isinstance(parent, PyShell):
+        if hasattr(parent, 'write'): # is shell?
             self.parent = parent
             self.text = parent.text
             # self.text.bind('<Control-m>', self.Setup)
