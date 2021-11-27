@@ -6,11 +6,19 @@ if __name__ == '__main__':
     __init__.test_editor(__file__)
 
 
+# TODO 中文html显示问题
+
+
 import os
 import difflib
 import webbrowser
-import tkinter as tk
-from idlelib.textview import ViewWindow, Button  # Button is ttk.Button
+# import tkinter as tk
+
+import sys
+if sys.version_info > (3, 6):
+    from idlelib.textview import view_text
+else:
+    from idlelib.textView import view_text
 
 
 # TODO 支持选择py或全部格式文件
@@ -26,8 +34,7 @@ def Comparing(parent, file1, file2):  # TODO 移植到不依赖输入，支持�
     d = difflib.Differ()
     ss3 = d.compare(ss1, ss2)
     text = '\n'.join(ss3)
-    dlg = ViewWindow(parent, title, text, wrap='none', _utest=True)
-    dlg.viewframe.button_ok.forget()  # ok按钮用的是ViewFrame里的控件!
+    dlg = view_text(parent, title, text)
 
     def show_html():
         d = difflib.HtmlDiff()
@@ -35,12 +42,7 @@ def Comparing(parent, file1, file2):  # TODO 移植到不依赖输入，支持�
             f.write(d.make_file(ss1, ss2))
         webbrowser.open(title + '.html')
 
-    toolbar = tk.Frame(dlg)
-    Button(toolbar, text='HTML', command=show_html).pack(side='left')
-    Button(toolbar, text='Close', command=dlg.viewframe.ok).pack(side='left')
-    toolbar.pack()
-
-    dlg.wait_window()
+    show_html()
 
 
 class CompareFile:

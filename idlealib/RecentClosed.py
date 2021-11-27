@@ -11,10 +11,15 @@ if __name__ == '__main__':
 import os
 import csv
 import tkinter as tk
-from idlelib.config import idleConf
 
+import sys
+if sys.version_info > (3, 6):
+    from idlelib.config import idleConf
+else:
+    from idlelib.configHandler import idleConf
 
-rc_path = os.path.join(idleConf.userdir, 'recent-saved.lst')
+userdir = idleConf.GetUserCfgDir()
+rc_path = os.path.join(userdir, 'recent-saved.lst')
 if not os.path.exists(rc_path):
     open(rc_path, 'w').close()
 

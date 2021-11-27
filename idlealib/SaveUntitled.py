@@ -11,8 +11,14 @@ if __name__ == '__main__':
 
 
 import time
-from idlelib.config import idleConf
-from idlelib.runscript import ScriptBinding
+
+import sys
+if sys.version_info > (3, 6):
+    from idlelib.config import idleConf
+    from idlelib.runscript import ScriptBinding
+else:
+    from idlelib.configHandler import idleConf
+    from idlelib.ScriptBinding import ScriptBinding
 
 
 class SaveUntitled:

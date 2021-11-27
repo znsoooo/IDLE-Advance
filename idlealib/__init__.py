@@ -13,8 +13,10 @@
 
 
 import os
+import sys
 import time
 
+PY36 = sys.version_info > (3, 6)
 EXTENSIONS = []
 
 
@@ -39,17 +41,50 @@ def wrap_function(func, before=(), after=()):
     return wrapper
 
 
+# - idleConf ----------------------------------------
+
+
+if not PY36:
+    from functools import partial
+    from idlelib.configHandler import idleConf
+
+    idleConf.GetOption = partial(idleConf.GetOption, warn_on_default=False)
+
+    # idleConf.userCfg['extensions'].set('ZzDummy', 'enable', 'true') # fix do not show many warning in py34 and py35
+    #
+    # if idleConf.userCfg['extensions'].has_option('ZzDummy', 'enable'):
+    #     ret = idleConf.userCfg['extensions'].Get('ZzDummy', 'enable', type='bool')
+    #     print(ret)
+    #
+    # print(idleConf.GetOption('extensions', 'ZzDummy', 'enable', default=True, type='bool'))
+    # sys.exit(0)
+
+    # idleConf._GetOption, idleConf.GetOption = idleConf.GetOption, print
+    # def GetOption(configType, section, option, *args, **kw):
+    #     if section.lower() == 'ZzDummy'.lower():
+    #         print((configType, section, option))
+    #         return False
+    #     ret = idleConf._GetOption(configType, section, option, *args, **kw)
+    #     return ret
+    # idleConf.GetOption = GetOption
+
+
 # - Calltip ----------------------------------------
 
 
-import idlelib.calltip
+if PY36:
+    import idlelib.calltip
+    from idlelib.calltip import Calltip
+else:
+    import idlelib.CallTips
+    from idlelib.CallTips import CallTips as Calltip
 
 
 # idlelib.calltip._MAX_LINES = 999
 # idlelib.calltip._MAX_COLS = 999
 
 
-class Calltip(idlelib.calltip.Calltip):
+class MyCalltip(Calltip):
     def __init__(self, editwin=None):
         super().__init__(editwin)
         editwin.ctip = self # make hook
@@ -60,34 +95,50 @@ class Calltip(idlelib.calltip.Calltip):
     #     return self.argspec
 
 
-idlelib.calltip.Calltip = Calltip
+if PY36:
+    idlelib.calltip.Calltip = MyCalltip
+else:
+    idlelib.CallTips.CallTips = MyCalltip
 
 
 # - AutoComplete ----------------------------------------
 
 
-import keyword
-import idlelib.autocomplete
+if sys.version_info < (3, 8):
+    if PY36:
+        import idlelib.autocomplete
+        from idlelib.autocomplete import AutoComplete
+    else:
+        import idlelib.AutoComplete
+        from idlelib.AutoComplete import AutoComplete
 
+    import keyword
+    ATTRS = 1 if sys.version_info < (3, 7) else 0
 
-class MyAutoComplete(idlelib.autocomplete.AutoComplete):
-    def fetch_completions(self, what, mode):
-        ret = super().fetch_completions(what, mode)
-        if mode == idlelib.autocomplete.COMPLETE_ATTRIBUTES and what == '':
-            for lst in ret[:2]:
-                lst.extend(v for v in keyword.kwlist if v not in lst) # `None/True/False` are repetitive.
-                lst.sort()
-        return ret
+    class MyAutoComplete(AutoComplete):
+        def fetch_completions(self, what, mode):
+            ret = super().fetch_completions(what, mode)
+            if mode == ATTRS and what == '':
+                for lst in ret[:2]:
+                    lst.extend(v for v in keyword.kwlist if v not in lst) # `None/True/False` are repetitive.
+                    lst.sort()
+            return ret
 
-
-idlelib.autocomplete.AutoComplete = MyAutoComplete
+    if PY36:
+        idlelib.autocomplete.AutoComplete = MyAutoComplete
+    else:
+        idlelib.AutoComplete.AutoComplete = MyAutoComplete
 
 
 # - IOBinding ----------------------------------------
 
 
-import idlelib.iomenu
-from idlelib.iomenu import IOBinding
+if PY36:
+    import idlelib.iomenu
+    from idlelib.iomenu import IOBinding
+else:
+    import idlelib.IOBinding
+    from idlelib.IOBinding import IOBinding
 
 
 class MyIOBinding(IOBinding):
@@ -102,7 +153,10 @@ class MyIOBinding(IOBinding):
         return super().defaultfilename(mode)
 
 
-idlelib.iomenu.IOBinding = MyIOBinding
+if PY36:
+    idlelib.iomenu.IOBinding = MyIOBinding
+else:
+    idlelib.IOBinding.IOBinding = MyIOBinding
 
 
 # - EditorWindow ----------------------------------------
@@ -111,8 +165,12 @@ idlelib.iomenu.IOBinding = MyIOBinding
 # editor.EditorWindow -> pyshell.PyShellEditorWindow
 # editor.EditorWindow -> outwin.OutputWindow -> pyshell.PyShell
 
-import idlelib.editor
-from idlelib.editor import EditorWindow
+if PY36:
+    import idlelib.editor
+    from idlelib.editor import EditorWindow
+else:
+    import idlelib.EditorWindow
+    from idlelib.EditorWindow import EditorWindow
 
 
 class MyEditorWindow(EditorWindow):
@@ -153,10 +211,16 @@ class MyEditorWindow(EditorWindow):
         else:
             menu.insert_cascade(index, label=label, menu=sub)
 
+    def load_extension(self, name):
+        # for PY34 always raise error.
+        if name == 'ZzDummy':
+            return
+        return super().load_extension(name)
+
     def load_adv_extensions(self):
         for file in EXTENSIONS:
             name, ext = os.path.splitext(os.path.basename(file))
-            if ext == '.py' and name not in ['__init__', '__main__']:
+            if ext == '.py' and name not in ('__init__', '__main__'):
                 try:
                     self.load_extension(name) # TODO 支持任意位置文件导入
                 except:
@@ -175,20 +239,28 @@ class MyEditorWindow(EditorWindow):
         print('functions:', ' '.join(v for v in dir(self.text) if 'tag' in v or 'mark' in v))
 
 
-idlelib.editor.EditorWindow = MyEditorWindow
+if PY36:
+    idlelib.editor.EditorWindow = MyEditorWindow
+else:
+    idlelib.EditorWindow.EditorWindow = MyEditorWindow
 
 
 # - Main ----------------------------------------
 
 
-from idlelib.pyshell import main  # must after hot patch
+# must after hot patch
+if PY36:
+    from idlelib.pyshell import main
+else:
+    from idlelib.PyShell import main
 
 
 def run(filename=None, exts=()):
     fix_path()
     EXTENSIONS.extend(exts)
     if not EXTENSIONS:
-        EXTENSIONS.extend(file for file in os.listdir(os.path.dirname(__file__)))
+        # `abspath` for open in cmd like `python __init__.py` to open script.
+        EXTENSIONS.extend(file for file in os.listdir(os.path.dirname(os.path.abspath(__file__))))
     if filename:
         import sys
         sys.argv.append(filename) # Idea from "~\Lib\tkinter\__main__.py"

@@ -10,9 +10,15 @@ if __name__ == '__main__':
 
 import os
 import csv
-from idlelib.config import idleConf
 
-rc_path = os.path.join(idleConf.userdir, 'recent-saved.lst')
+import sys
+if sys.version_info > (3, 6):
+    from idlelib.config import idleConf
+else:
+    from idlelib.configHandler import idleConf
+
+userdir = idleConf.GetUserCfgDir()
+rc_path = os.path.join(userdir, 'recent-saved.lst')
 if not os.path.exists(rc_path):
     open(rc_path, 'w').close()
 
