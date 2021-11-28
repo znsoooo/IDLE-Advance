@@ -6,6 +6,9 @@ if __name__ == '__main__':
     __init__.test_editor(__file__)
 
 
+import sys
+PY37 = sys.version_info > (3, 7)
+
 import tkinter as tk
 
 
@@ -18,5 +21,8 @@ class ScrollHorizontal:
         hbar = tk.Scrollbar(frame, orient='h')
         hbar['command'] = text.xview
         text['xscrollcommand'] = hbar.set
-        hbar.pack(fill='x', side='bottom')
+        if PY37:
+            hbar.grid(row=2, column=1, sticky='nsew')
+        else:
+            hbar.pack(fill='x', side='bottom')
         # TODO 参考 idlelib.textview.ViewWindow 的 AutoHiddenScrollbar 方法

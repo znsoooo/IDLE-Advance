@@ -14,6 +14,8 @@ if __name__ == '__main__':
     import __init__
     __init__.test_editor(__file__)
 
+import sys
+PY37 = sys.version_info > (3, 7)
 
 import re
 import tkinter as tk
@@ -94,10 +96,16 @@ class ReplaceBar(tk.Frame):
     def Flip(self, evt):
         self.show = not self.show
         if self.show:
-            self.pack(fill='x', side='bottom')
+            if PY37:
+                self.grid(row=3, column=1, sticky='nsew')
+            else:
+                self.pack(fill='x', side='bottom')
             self.Find()
         else:
-            self.forget()
+            if PY37:
+                self.grid_forget()
+            else:
+                self.forget()
             self.text.tag_remove('hit', '1.0', 'end')
             self.text.focus()
 
