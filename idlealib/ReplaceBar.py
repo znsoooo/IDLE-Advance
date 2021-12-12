@@ -8,38 +8,24 @@
 
 # TODO 处理好和纵向滚动条的相对位置问题
 # TODO shell中的stdout无法匹配
+# TODO pat == '' 时报错提示
 
 
 if __name__ == '__main__':
     import __init__
     __init__.test_editor(__file__)
 
+
+import tkinter as tk
+
 import sys
 PY37 = sys.version_info > (3, 7)
-
-import re
-import tkinter as tk
-from tkinter.messagebox import showinfo
-
-
-def SelectSpan(text, span, ins):
-    c1, c2 = '1.0+%dc' % span[0], '1.0+%dc' % span[1]
-    text.tag_remove('sel', '1.0', 'end')
-    text.tag_add('sel', c1, c2)
-    text.mark_set('insert', [c1, c2][ins])
-    text.see(c1)
-
-
-def PrepFind(pat, repl, isre=False, case=True, word=False):
-    flag = re.M
-    if not isre:
-        pat = re.escape(pat)
-        repl = re.escape(repl)
-    if not case:
-        flag |= re.I
-    if word:  # surround "\b" after escape
-        pat = r'\b%s\b' % pat
-    return pat, repl, flag
+if sys.version_info > (3, 6):
+    from idlelib import searchengine
+    from idlelib.replace import ReplaceDialog
+else:
+    # TODO 兼容 PY34
+    from idlelib.SearchDialog import _setup
 
 
 class ReplaceBar(tk.Frame):
@@ -47,28 +33,23 @@ class ReplaceBar(tk.Frame):
         tk.Frame.__init__(self, parent.text_frame)
 
         self.root = parent.root
-
-        self.show = True
-
         self.text = parent.text
 
-        # TODO 从idle中获取设置
-        self.patvar  = tk.StringVar(self, '')     # search pattern
-        self.replvar = tk.StringVar(self, '')     # replace string
-        self.revar   = tk.BooleanVar(self, False) # regular expression?
-        self.casevar = tk.BooleanVar(self, False) # match case?
-        self.wordvar = tk.BooleanVar(self, False) # match whole word?
-        self.backvar = tk.BooleanVar(self, False) # search backwards?
+        self.engine = engine = searchengine.get(self.root)
+        self.replace = replace = ReplaceDialog(self.root, engine)
 
-        self.patvar .trace('w', self.Find) # TODO 绑定active事件
-        self.replvar.trace('w', self.Find)
-        self.revar  .trace('w', self.Find)
-        self.casevar.trace('w', self.Find)
-        self.wordvar.trace('w', self.Find)
-        self.backvar.trace('w', self.Find)
+        # hot fix for `dialog.open(text)` effect called in `idlelib.replace.replace`
+        replace.text = self.text
+        replace.ok = 1
+        replace.bell = parent.top.bell
 
-        t1 = tk.Entry(self, width=8, textvariable=self.patvar)
-        t2 = tk.Entry(self, width=8, textvariable=self.replvar)
+        engine.patvar .trace('w', self.Update)
+        engine.revar  .trace('w', self.Update)
+        engine.casevar.trace('w', self.Update)
+        engine.wordvar.trace('w', self.Update)
+
+        t1 = tk.Entry(self, width=8, textvariable=engine.patvar)
+        t2 = tk.Entry(self, width=8, textvariable=replace.replvar)
         tk.Label(self, text='Find:').pack(side='left')
         t1.pack(side='left', fill='x', expand=True)
         tk.Label(self, text='Repl:').pack(side='left')
@@ -77,20 +58,21 @@ class ReplaceBar(tk.Frame):
         self.tip = tk.Label(self, text=' Match: 0')
         self.tip.pack(side='left')
 
-        tk.Checkbutton(self, text='Cc', variable=self.casevar).pack(side='left')
-        tk.Checkbutton(self, text='Wd', variable=self.wordvar).pack(side='left')
-        tk.Checkbutton(self, text='Re', variable=self.revar)  .pack(side='left')
+        tk.Checkbutton(self, text='Re', variable=engine.revar)  .pack(side='left')
+        tk.Checkbutton(self, text='Cc', variable=engine.casevar).pack(side='left')
+        tk.Checkbutton(self, text='Wd', variable=engine.wordvar).pack(side='left')
 
-        tk.Button(self, relief='groove', text='<<', command=lambda: self.View(0)).pack(side='left')
-        tk.Button(self, relief='groove', text='>>', command=lambda: self.View(1)).pack(side='left')
+        tk.Button(self, relief='groove', text='<<', command=lambda: self.Find(0)).pack(side='left')
+        tk.Button(self, relief='groove', text='>>', command=lambda: self.Find(1)).pack(side='left')
         tk.Button(self, relief='groove', text='Replace', command=self.Replace).pack(side='left')
-        tk.Button(self, relief='groove', text='Replace All', command=self.ReplaceSelected).pack(side='left')
+        tk.Button(self, relief='groove', text='Replace All', command=self.ReplaceAll).pack(side='left')
 
         self.text.bind('<<replace-bar-show>>', self.Flip)
         self.text.event_add('<<replace-bar-show>>', '<Key-Escape>') # add event but not clear exist bindings.
         t1.bind('<Escape>', self.Flip)
         t2.bind('<Escape>', self.Flip)
 
+        self.show = False
         self.Flip(-1)
 
     def Flip(self, evt):
@@ -100,7 +82,7 @@ class ReplaceBar(tk.Frame):
                 self.grid(row=3, column=1, sticky='nsew')
             else:
                 self.pack(fill='x', side='bottom')
-            self.Find()
+            self.Update()
         else:
             if PY37:
                 self.grid_forget()
@@ -109,63 +91,34 @@ class ReplaceBar(tk.Frame):
             self.text.tag_remove('hit', '1.0', 'end')
             self.text.focus()
 
-    def Find(self, *args):
+    def Update(self, *args):
         self.text.tag_remove('hit', '1.0', 'end')
         self.tip.config(text=' Match: 0')
 
-        pat = self.patvar.get()
-        if not pat:
+        if not self.engine.getpat():
             return
-        pat, repl, flag = PrepFind(pat, self.replvar.get(), self.revar.get(), self.casevar.get(), self.wordvar.get())
 
-        # s = self.text.get('sel.first', 'sel.last')
         s = self.text.get('1.0', 'end-1c')
-        matchs = [m.span() for m in re.finditer(pat, s, flag)]
-        self.Highlight(matchs)
-
-        return matchs, pat, repl, flag
-
-    def Highlight(self, matchs):
-        for p1, p2 in matchs:
-            self.text.tag_add('hit', '1.0+%dc' % p1, '1.0+%dc' % p2)
+        insert = len(self.text.get('1.0', 'insert'))
+        prog = self.engine.getprog()
+        matchs = [m.span() for m in prog.finditer(s)]
         self.tip.config(text=' Match: %d' % len(matchs))
+        for n, (p1, p2) in enumerate(matchs):
+            if p1 <= insert < p2:
+                self.tip.config(text=' Match: %d/%d' % (n + 1, len(matchs)))
+            self.text.tag_add('hit', '1.0+%dc' % p1, '1.0+%dc' % p2)
 
-    def View(self, next):
-        """next: 1 -> forward, 0 -> backward"""
-        # TODO 移动光标到选区边缘后继续查找
-        self.backvar.set(not next)
-        matchs, pat, repl, flag = self.Find()
-        if matchs:
-            ins = len(self.text.get('1.0', 'insert')) # cursor offset
-            now = sorted([p1 for p1, p2 in matchs] + [ins]).index(ins) - 1
-            new = (now + next) % len(matchs)
-            SelectSpan(self.text, matchs[new], next)
-            self.tip.config(text=' Match: %d/%d' % (new + 1, len(matchs)))
+    def Find(self, forward):
+        self.engine.wrapvar.set(True)
+        self.engine.backvar.set(not forward)
+        self.replace.find_it()
+        self.Update()
 
     def Replace(self):
-        next = not self.backvar.get()
-        if self.text.get('sel.first', 'sel.last'):
-            self.ReplaceSelected()
-        self.View(next)
-        # TODO 如果选区未完全匹配表达式也不替换
-        # TODO 第一次只匹配不替换
+        self.replace.default_command()
+        self.text.after(5, self.Update) # TODO unknown reason
 
-    def ReplaceSelected(self):
-        text = self.text
-
-        save = text.index('insert')
-        ss = text.get('sel.first', 'sel.last')
-        if not ss:
-            text.tag_add('sel', '1.0', 'end-1c')
-
-        s1 = text.get('sel.first', 'sel.last')
-        matchs, pat, repl, flag = self.Find()
-        s2, n = re.subn(pat, repl, s1, flags=flag)
-
-        text.undo_block_start()
-        text.delete('sel.first', 'sel.last')
-        text.insert('insert', s2) # TODO 光标移动到了最后
-        text.undo_block_stop()
-
-        showinfo('Replace', '%d places was replaced in selected text.' % n, parent=self.root)
-
+    def ReplaceAll(self):
+        # TODO 替换选区部分内容
+        self.replace.replace_all()
+        self.text.after(5, self.Update) # TODO unknown reason
