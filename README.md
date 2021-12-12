@@ -2,7 +2,7 @@
 
 ## About
 - __Platform:__ >= Windows or Linux/macOS (untested)
-- __Python:__ >= Python 3.6
+- __Python:__ >= Python 3.4
 - __Author:__ Lishixian (znsoooo)
 - __Github:__ https://github.com/znsoooo/IDLE-Advance
 - __License:__ MIT License. Copyright (c) 2021 Lishixian (znsoooo). All Rights Reserved.
@@ -102,7 +102,7 @@ and set `value` as:
 
 
 ## 运行方法
-- __平台：__ Windows/Python3.6 （其他平台未测试，但是计划支持Windows/Linux/macOS和Python3.4以上的版本）
+- __平台：__ Windows/Python3.4 （Python3.4.4是Windows XP支持的最后一个版本，所以低于此版本的不再测试。Linux/macOS平台未做测试）
 - __依赖：__ 可选择地安装windnd库，增加拖拽脚本文件到窗口即可打开的快捷操作，不安装此依赖也不影响整体运行
 - __使用：__ 用python启动run.py文件，随后在此界面上操作打开其他的脚本文件即可
 - __功能：__ 见后文todolist，实现的功能已经标记，剩余部分争取在1年之内完成
@@ -184,7 +184,7 @@ and set `value` as:
 ☆（Other）
 - [x] 模块单元测试
 - [x] 提交PyPI
-- [ ] 兼容py34
+- [x] 兼容py34
 - [ ] 扩展管理器（开关和配置热键）
 - [ ] 检查更新
 - [ ] 关于框
