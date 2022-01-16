@@ -1,1 +1,1 @@
-pythonw run.py
+start pythonw run.py
