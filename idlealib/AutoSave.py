@@ -13,6 +13,9 @@ TICK = 7000
 
 class AutoSave:
     def __init__(self, parent):
+        if hasattr(parent, 'write'): # is shell?
+            return
+
         self.text = parent.text
         self.root = parent.root
         self.io = parent.io
