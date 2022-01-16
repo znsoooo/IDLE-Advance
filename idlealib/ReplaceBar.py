@@ -28,6 +28,10 @@ else:
     from idlelib.SearchDialog import _setup
 
 
+jn = lambda x,y: '%i.%i'%(x,y) # Good!
+lc = lambda s: jn(s.count('\n')+1, len(s)-s.rfind('\n')-1) # Good!
+
+
 class ReplaceBar(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent.text_frame)
@@ -106,7 +110,7 @@ class ReplaceBar(tk.Frame):
         for n, (p1, p2) in enumerate(matchs):
             if p1 <= insert < p2:
                 self.tip.config(text=' Match: %d/%d' % (n + 1, len(matchs)))
-            self.text.tag_add('hit', '1.0+%dc' % p1, '1.0+%dc' % p2)
+            self.text.tag_add('hit', lc(s[:p1]), lc(s[:p2])) # 如果使用`1.0+nc`字符偏移会命中Squeezer导致错位
 
     def Find(self, forward):
         self.engine.wrapvar.set(True)

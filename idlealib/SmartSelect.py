@@ -10,6 +10,8 @@ if __name__ == '__main__':
 import re
 
 sp = lambda c: eval(c.replace('.',',')) # Good!
+jn = lambda x,y: '%i.%i'%(x,y) # Good!
+lc = lambda s: jn(s.count('\n')+1, len(s)-s.rfind('\n')-1) # Good!
 
 
 def Select(text, c1, c2):
@@ -113,7 +115,6 @@ def Selecting(e):
                     break
 
         elif re.match(r'\w', c):
-            # TODO 换个颜色（不是hit）（参考：notepad++是深绿和浅绿）
             # TODO 选中后取消
             # TODO 一行中第一个word如果是一个字符无法选中（命中另一个规则）
             p1, p2 = MatchSpan(r'\w+', line, col)
@@ -122,7 +123,7 @@ def Selecting(e):
             s = text.get('1.0', 'end')
             for m in re.finditer(r'\b%s\b' % word, s):
                 p1, p2 = m.span()
-                text.tag_add('hit', '1.0+%dc' % p1, '1.0+%dc' % p2)
+                text.tag_add('hit', lc(s[:p1]), lc(s[:p2])) # 如果使用`1.0+nc`字符偏移会命中Squeezer导致错位
 
         elif re.match(r'\W', c):
             # 改善“s.split('\n')[:ln]”会匹配”')[:“的糟糕匹配体验
