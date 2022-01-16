@@ -144,7 +144,7 @@ else:
 class MyIOBinding(IOBinding):
     def __init__(self, editwin):
         # F5保存时，调用idlelib.runscript.getfilename()，设置自动保存时进入self.editwin.io.save(None)进行保存
-        self.save = wrap_function(self.save, after=editwin.after_save)
+        self.save = wrap_function(self.save, editwin.before_save, editwin.after_save)
         IOBinding.__init__(self, editwin)
 
     def defaultfilename(self, mode="open"):
@@ -180,6 +180,7 @@ class MyEditorWindow(EditorWindow):
 
         self.before_copy = []
         self.after_save  = []
+        self.before_save = []
         self.after_close = []
 
         # must before text binding, so before `EditorWindow.__init__()`

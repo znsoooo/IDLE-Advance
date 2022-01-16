@@ -24,7 +24,9 @@ def StampFile(path):
 class SaveArchive:
     def __init__(self, parent):
         self.io = parent.io
-        parent.after_save.append(self.Saving)
+        self.get_saved = parent.get_saved
+        parent.before_save.append(self.Saving)
 
     def Saving(self):
-        self.io.writefile(StampFile(self.io.filename)) # todo 只有未保存的状态下保存才会保存副本
+        if not self.get_saved():
+            self.io.writefile(StampFile(self.io.filename))
