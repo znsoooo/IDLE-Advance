@@ -35,7 +35,7 @@ setuptools.setup(
         'Topic :: Text Editors :: Integrated Development Environments (IDE)',
     ],
     packages=setuptools.find_packages(),
-    python_requires='>=3.6',
+    python_requires='>=3.4',
 
     # install_requires=['windnd'], # for drag-open file feature
     # extras_requires={'windnd': ['windnd']},
