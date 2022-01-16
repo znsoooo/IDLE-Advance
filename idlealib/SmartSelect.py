@@ -25,16 +25,6 @@ def FixTextSelect(root):
     tk.eval('bind Text <Double-1> {catch {%W mark set insert sel.first}}') # See: "~\tcl\tk8.6\text.tcl"
 
 
-def CurrentInTag(text, tag):
-    cur = text.index('current')
-    pre = text.tag_prevrange(tag, cur)
-    nex = text.tag_nextrange(tag, cur)
-    if pre and (sp(pre[0]) <= sp(cur) < sp(pre[1])):
-        return pre
-    if nex and (sp(nex[0]) <= sp(cur) < sp(nex[1])):
-        return nex
-
-
 def FindParen(s, c1='(', c2=')'):
     lv = 0
     for n, c in enumerate(s):
@@ -57,13 +47,13 @@ def Selecting(e):
     text = e.widget
     text.tag_remove('hit', '1.0', 'end')
 
-    comment_or_string = CurrentInTag(text, 'COMMENT') or CurrentInTag(text, 'STRING')
-    if comment_or_string: # TODO 注释前的空格
-        c1, c2 = comment_or_string
-        text.mark_set('insert', c1)
-        text.tag_remove('sel', '1.0', 'end')
-        text.tag_add('sel', c1, c2)
-        return
+    for tag in text.tag_names('current'):
+        if tag in ('COMMENT', 'STRING'): # TODO 注释前的空格
+            st, ed = text.tag_prevrange(tag, 'current' + '+1c') # See: `idlelib.squeezer.Squeezer.squeeze_current_text_event`
+            text.mark_set('insert', st)
+            text.tag_remove('sel', '1.0', 'end')
+            text.tag_add('sel', st, ed)
+            return
 
     cur = text.index('current') # 当用insert时光标位置为自动选区的最开始
     # print(cur)
