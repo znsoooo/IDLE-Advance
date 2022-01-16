@@ -20,13 +20,24 @@ import tkinter as tk
 
 import sys
 PY37 = sys.version_info > (3, 7)
-if sys.version_info > (3, 6):
+PY36 = sys.version_info > (3, 6)
+if PY36:
     from idlelib import searchengine
     from idlelib.replace import ReplaceDialog
+    from idlelib.searchbase import SearchDialogBase
 else:
-    # TODO 兼容 PY34
-    from idlelib.SearchDialog import _setup
+    import idlelib.SearchEngine as searchengine
+    from idlelib.ReplaceDialog import ReplaceDialog
+    from idlelib.SearchDialogBase import SearchDialogBase
 
+
+def _open(self, text, string=None):
+    text.event_generate('<<replace-bar-show>>')
+    if string:
+        self.engine.setpat(string)
+
+
+SearchDialogBase.open = _open # hack dialog open function
 
 jn = lambda x,y: '%i.%i'%(x,y) # Good!
 lc = lambda s: jn(s.count('\n')+1, len(s)-s.rfind('\n')-1) # Good!
@@ -71,29 +82,26 @@ class ReplaceBar(tk.Frame):
         tk.Button(self, relief='groove', text='Replace', command=self.Replace).pack(side='left')
         tk.Button(self, relief='groove', text='Replace All', command=self.ReplaceAll).pack(side='left')
 
-        self.text.bind('<<replace-bar-show>>', self.Flip)
-        self.text.event_add('<<replace-bar-show>>', '<Key-Escape>') # add event but not clear exist bindings.
-        t1.bind('<Escape>', self.Flip)
-        t2.bind('<Escape>', self.Flip)
+        self.text.bind('<<replace-bar-show>>', self.Show)
+        self.text.bind('<Key-Escape>', self.Hide)
+        # self.text.event_add('<<replace-bar-show>>', '<Key-Escape>') # add event but not clear exist bindings.
+        t1.bind('<Escape>', self.Hide)
+        t2.bind('<Escape>', self.Hide)
 
-        self.show = False
-        self.Flip(-1)
-
-    def Flip(self, evt):
-        self.show = not self.show
-        if self.show:
-            if PY37:
-                self.grid(row=3, column=1, sticky='nsew')
-            else:
-                self.pack(fill='x', side='bottom')
-            self.Update()
+    def Show(self, evt):
+        if PY37:
+            self.grid(row=3, column=1, sticky='nsew')
         else:
-            if PY37:
-                self.grid_forget()
-            else:
-                self.forget()
-            self.text.tag_remove('hit', '1.0', 'end')
-            self.text.focus()
+            self.pack(fill='x', side='bottom')
+        self.Update()
+
+    def Hide(self, evt):
+        if PY37:
+            self.grid_forget()
+        else:
+            self.forget()
+        self.text.tag_remove('hit', '1.0', 'end')
+        self.text.focus()
 
     def Update(self, *args):
         self.text.tag_remove('hit', '1.0', 'end')
