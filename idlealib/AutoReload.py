@@ -1,7 +1,5 @@
 '''重载文件'''
 
-# TODO F5运行的时候保存了吗？提示文件有更新
-
 
 if __name__ == '__main__':
     import __init__
@@ -13,20 +11,19 @@ from tkinter.messagebox import askyesno
 
 
 def mtime(file):
-    if file:
-        return str(int(os.stat(file).st_mtime * 1e7))  # TODO 查看修改日期我之前是怎么写的？
-    else:
-        return 0
+    return os.path.getmtime(file) if file else 0
 
 
 class AutoReload:
     def __init__(self, parent):
         self.root = parent.root
         self.io = parent.io
+        self.set_saved = parent.set_saved
 
         self.mt = mtime(self.io.filename)
         parent.text_frame.bind('<FocusIn>', self.OnFocusIn)
         parent.after_save.append(self.Refresh)
+        parent.add_adv_menu('Reload', self.ReloadFile)
 
     def Refresh(self):
         self.mt = mtime(self.io.filename)
@@ -38,7 +35,7 @@ class AutoReload:
         mt = mtime(self.io.filename)
         if self.mt != mt:
             self.mt = mt  # 激活窗口最多只提示一次，下一次提示在本地文件再次发生修改
-            if askyesno('Refresh?', 'Find text changed, do you need to refresh?', parent=self.root):  # TODO 参考notepad的窗口提示文本
+            if askyesno('Reload', '"%s"\n\nThis script has been modified by another program.\nDo you want to reload it?' % self.io.filename, parent=self.root):
                 self.ReloadFile()
             else:
-                pass # todo 设置为未保存状态
+                self.set_saved(False) # 设置为未保存状态
