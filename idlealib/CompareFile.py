@@ -6,54 +6,58 @@ if __name__ == '__main__':
     __init__.test_editor(__file__)
 
 
-# TODO 中文html显示问题
-
-
-import os
 import difflib
-import webbrowser
-# import tkinter as tk
+import tkinter as tk
 
-import sys
-if sys.version_info > (3, 6):
-    from idlelib.textview import view_text
-else:
-    from idlelib.textView import view_text
+# import sys
+# if sys.version_info > (3, 6):
+#     from idlelib.textview import view_text
+# else:
+#     from idlelib.textView import view_text
 
 
-# TODO 支持选择py或全部格式文件
+# def show_html(title, s1, s2):
+#     d = difflib.HtmlDiff()
+#     with open(title + '.html', 'w', encoding='u8') as f:
+#         f.write(d.make_file(s1.split('\n'), s2.split('\n')))
+#     import webbrowser
+#     webbrowser.open(title + '.html')
+
+
 # TODO 优先比对已经打开的文件（列表）
 
-def Comparing(parent, file1, file2):  # TODO 移植到不依赖输入，支持任意文件接口
-    with open(file1, encoding='u8') as f:
-        ss1 = f.read().split('\n')
-    with open(file2, encoding='u8') as f:
-        ss2 = f.read().split('\n')
-    title = 'Different between %s and %s' % (os.path.basename(file1), os.path.basename(file2))  # TODO 我之前时怎么命名的？
 
-    d = difflib.Differ()
-    ss3 = d.compare(ss1, ss2)
-    text = '\n'.join(ss3)
-    dlg = view_text(parent, title, text)
-
-    def show_html():
-        d = difflib.HtmlDiff()
-        with open(title + '.html', 'w', encoding='u8') as f:
-            f.write(d.make_file(ss1, ss2))
-        webbrowser.open(title + '.html')
-
-    show_html()
+def ReadFile(file):
+    with open(file, encoding='u8') as f:
+        return f.read()
 
 
-class CompareFile:
+class CompareFile(tk.Menu):
     def __init__(self, parent):
+        tk.Menu.__init__(self, parent.menubar, tearoff=0)
         self.text = parent.text
         self.io = parent.io
+        self.top = parent.top
+        self.flist = parent.flist
 
-        parent.add_adv_menu('Compare to File', self.OnCompareFile, sp=True)
+        parent.add_adv_menu('Compare to File', self.CompareFile, sp=True)
+        parent.add_adv_menu('Compare to Clipboard', self.CompareClipboard)
 
-    def OnCompareFile(self):
-        file1 = self.io.filename
-        file2 = self.io.askopenfile()
-        if file2:
-            Comparing(self.text, file1, file2)
+    def ShowDiff(self, s1, s2):
+        diff = difflib.unified_diff(s1.splitlines(True), s2.splitlines(True))
+        diff = ''.join(diff) or '@@ same text @@'
+        editwin = self.flist.new(None)
+        editwin.text.insert('1.0', diff)
+        editwin.set_saved(True) # close with no prompt
+
+    def CompareFile(self):
+        p2 = self.io.askopenfile()
+        if p2:
+            s1 = self.text.get('1.0', 'end-1c')
+            s2 = ReadFile(p2)
+            self.ShowDiff(s1, s2)
+
+    def CompareClipboard(self):
+        s1 = self.text.get('sel.first', 'sel.last')
+        s2 = self.text.clipboard_get()
+        self.ShowDiff(s1, s2)
