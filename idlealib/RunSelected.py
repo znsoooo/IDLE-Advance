@@ -29,6 +29,12 @@ class RunSelected(tk.Menu):
 
     def Run(self, st, ed):
         code = self.text.get(st, ed)
+
+        if not code:
+            self.text.tag_add('sel', 'insert linestart', 'insert+1l linestart')
+            self.text.mark_set('insert', 'insert linestart')
+            code = self.text.get(st, ed)
+
         if code.startswith(' '):
             code = 'if 1:\n' + code
 
