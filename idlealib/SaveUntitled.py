@@ -2,13 +2,14 @@
 
 
 import os
+import time
 
 if __name__ == '__main__':
     import __init__
     __init__.test_editor(__file__)
 
 
-PATH = '~autosave.py'
+PATH = '.pybak/autosave.py'
 
 
 class SaveUntitled:
@@ -20,32 +21,24 @@ class SaveUntitled:
         self.io = parent.io
         self.get_saved = parent.get_saved  # function
 
-        parent.after_close.append(self.Backup)
+        parent.after_close.append(self.Backup) # TODO 关闭时选择取消会也会调用
         self.Reload()
 
     def Backup(self):
-        # print('Backup')
         if self.io.filename is None: # is untitled script?
-            if self.text.get('1.0', 'end-1c'):
-                self.io.writefile(PATH)
+            s = self.text.get('1.0', 'end-1c').rstrip()
+            if s:
+                os.makedirs('.pybak', exist_ok=True)
+                with open(PATH, 'a') as f:
+                    f.write(time.strftime('# autosave @ %Y-%m-%d %H:%M:%S\n') + s + '\n\n')
             elif os.path.isfile(PATH):
                 os.remove(PATH)
 
     def Reload(self):
-        # print('Reload')
         if self.io.filename is None: # is untitled script?
             if os.path.isfile(PATH):
-                self.FakeLoadFile(PATH)
+                with open(PATH) as f:
+                    s = f.read()
+                self.text.insert('1.0', s)
+                self.text.mark_set('insert', '1.0')
                 os.remove(PATH)
-
-    def FakeLoadFile(self, filename): # is that too.. dirty?
-        fake = lambda *args: None
-        temp = self.io.set_filename, self.io.reset_undo, self.io.updaterecentfileslist
-        self.io.set_filename = self.io.reset_undo = self.io.updaterecentfileslist = fake
-
-        self.text.undo_block_start()
-        self.text.insert('1.0', '') # In order to undo, the cursor can move to the top.
-        self.io.loadfile(filename)
-        self.text.undo_block_stop()
-
-        self.io.set_filename, self.io.reset_undo, self.io.updaterecentfileslist = temp
