@@ -7,6 +7,12 @@ if __name__ == '__main__':
 
 import tkinter as tk
 
+SRC_ST = '1.0'
+SRC_ED = 'end'
+SEL_ST = 'sel.first'
+SEL_ED = 'sel.last'
+INS_ST = 'insert'
+
 
 class RunSelected(tk.Menu):
     def __init__(self, parent):
@@ -21,41 +27,35 @@ class RunSelected(tk.Menu):
         self.Binding()
         parent.amenu.insert_cascade(3, label='Run Selected', menu=self) # TODO 单元测试时插入偏差
 
-    def Run(self, mode):
-        '''mode: -1, 0, 1'''
-        c1 = ['sel.first', 'insert', '1.0'][mode]
-        c2 = ['sel.last',  'end', 'insert'][mode]
-
-        code = self.text.get(c1, c2)
+    def Run(self, st, ed):
+        code = self.text.get(st, ed)
         if code.startswith(' '):
             code = 'if 1:\n' + code
 
         # ref: idlexlib.extensions.RunSelection
-        msg = '# Run Region [%s-%s]\n' % (self.text.index(c1), self.text.index(c2))
+        msg = '# Run Region [%s-%s]\n' % (self.text.index(st), self.text.index(ed))
         shell = self.flist.open_shell()
         console = shell.interp.tkconsole
-        console.text.insert('insert', msg)
+        console.text.insert('insert', msg.replace('.', ':'))
         shell.interp.runcode(code)
         # TODO 报错位置和真实行号对应
 
     def MakeMenu(self, pos):
-        params = [( 1, 'Run from Cursor'),
-                  (-1, 'Run to Cursor'),
-                  ( 0, 'Run Selected')]
+        self.add_command(label='Run Selected',    command=lambda: self.Run(SEL_ST, SEL_ED))
+        self.add_command(label='Run to Cursor',   command=lambda: self.Run(SRC_ST, INS_ST))
+        self.add_command(label='Run from Cursor', command=lambda: self.Run(INS_ST, SRC_ED))
+        self.add_command(label='Run this Script', command=lambda: self.Run(SRC_ST, SRC_ED))
 
-        self.add_command(label='Run from Cursor', command=lambda: self.Run(1))
-        self.add_command(label='Run to Cursor', command=lambda: self.Run(-1))
-        self.add_command(label='Run Selected', command=lambda: self.Run(0))
-
-        rmenu = self.rmenu
-        rmenu.insert_command(pos, label='Run from Cursor', command=lambda: self.Run(1))
-        rmenu.insert_command(pos, label='Run to Cursor', command=lambda: self.Run(-1))
-        rmenu.insert_command(pos, label='Run Selected', command=lambda: self.Run(0))
+        rmenu = self.rmenu # reverse order
+        rmenu.insert_command(pos, label='Run this Script', command=lambda: self.Run(SRC_ST, SRC_ED))
+        rmenu.insert_command(pos, label='Run from Cursor', command=lambda: self.Run(INS_ST, SRC_ED))
+        rmenu.insert_command(pos, label='Run to Cursor',   command=lambda: self.Run(SRC_ST, INS_ST))
+        rmenu.insert_command(pos, label='Run Selected',    command=lambda: self.Run(SEL_ST, SEL_ED))
         rmenu.insert_separator(pos)
 
     def Binding(self):
         text = self.text
-        text.bind('<F6>', lambda e: self.Run(-1))
-        text.bind('<F7>', lambda e: self.Run(0))
-        text.bind('<F8>', lambda e: self.Run(1))
-
+        text.bind('<F6>', lambda e: self.Run(SRC_ST, INS_ST))
+        text.bind('<F7>', lambda e: self.Run(SEL_ST, SEL_ED))
+        text.bind('<F8>', lambda e: self.Run(INS_ST, SRC_ED))
+        text.bind('<Shift-F5>', lambda e: self.Run(SRC_ST, SRC_ED))
