@@ -1,7 +1,5 @@
 """自动保存Untitled"""
 
-# Will make `.autosave` dir.  TODO 把各个插件的文件读写需求情况写明
-
 
 import os
 
@@ -10,30 +8,44 @@ if __name__ == '__main__':
     __init__.test_editor(__file__)
 
 
-import time
-
-import sys
-if sys.version_info > (3, 6):
-    from idlelib.config import idleConf
-    from idlelib.runscript import ScriptBinding
-else:
-    from idlelib.configHandler import idleConf
-    from idlelib.ScriptBinding import ScriptBinding
+PATH = '~autosave.py'
 
 
 class SaveUntitled:
     def __init__(self, parent):
+        if hasattr(parent, 'write'): # is shell?
+            return
+
+        self.text = parent.text
         self.io = parent.io
         self.get_saved = parent.get_saved  # function
 
-        self.sb = ScriptBinding(parent)
-        parent.text.bind("<<check-module>>", self.sb.check_module_event)
-        parent.text.bind("<<run-module>>", self.run_module_event)
+        parent.after_close.append(self.Backup)
+        self.Reload()
 
-    def run_module_event(self, evt):
-        autosave = idleConf.GetOption('main', 'General', 'autosave', type='bool')
-        if autosave and not self.io.filename and not self.get_saved():
-            self.io.filename = os.path.abspath(time.strftime('.autosave/Untitled@%Y%m%d_%H%M%S.py'))
-            os.makedirs('.autosave', exist_ok=True)
-            self.io.save(None)
-        self.sb.run_module_event(evt)
+    def Backup(self):
+        # print('Backup')
+        if self.io.filename is None: # is untitled script?
+            if self.text.get('1.0', 'end-1c'):
+                self.io.writefile(PATH)
+            elif os.path.isfile(PATH):
+                os.remove(PATH)
+
+    def Reload(self):
+        # print('Reload')
+        if self.io.filename is None: # is untitled script?
+            if os.path.isfile(PATH):
+                self.FakeLoadFile(PATH)
+                os.remove(PATH)
+
+    def FakeLoadFile(self, filename): # is that too.. dirty?
+        fake = lambda *args: None
+        temp = self.io.set_filename, self.io.reset_undo, self.io.updaterecentfileslist
+        self.io.set_filename = self.io.reset_undo = self.io.updaterecentfileslist = fake
+
+        self.text.undo_block_start()
+        self.text.insert('1.0', '') # In order to undo, the cursor can move to the top.
+        self.io.loadfile(filename)
+        self.text.undo_block_stop()
+
+        self.io.set_filename, self.io.reset_undo, self.io.updaterecentfileslist = temp
