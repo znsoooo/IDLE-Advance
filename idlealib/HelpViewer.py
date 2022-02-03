@@ -35,4 +35,4 @@ class HelpViewer:
 
     def view(self):
         sel = self.text.get('sel.first', 'sel.last')
-        view_text(self.text, 'Help on %r:' % sel, HelpText(sel))
+        view_text(self.text, 'Help on %r:' % sel, HelpText(sel), modal=False)
