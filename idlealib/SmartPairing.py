@@ -29,12 +29,13 @@ class SmartPairing:
             right = 'sel.last' if sel else 'insert'
 
             text.undo_block_start()
+            if sel and text.get(left) != c:
+                self.PairDelete(-1)
             text.insert(left, c)
             text.mark_gravity('insert', 'left')
             text.insert(right, pair(c))
             text.mark_gravity('insert', 'right')
             text.undo_block_stop()
-
             return 'break'
 
         elif c in RIGHT: # 输入右括号时移动光标但不键入
