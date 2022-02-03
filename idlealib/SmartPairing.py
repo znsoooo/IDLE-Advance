@@ -44,7 +44,17 @@ class SmartPairing:
 
     def PairDelete(self, evt): # 删除左括号时同时删除右括号
         text = self.text
-        c = text.get('insert-1c')
-        if c in LEFT and pair(c) == text.get('insert'):
-            text.delete('insert-1c', 'insert+1c')
+
+        sel = text.tag_ranges('sel')
+        left = 'sel.first' if sel else 'insert-1c'
+        right = 'sel.last-1c' if sel else 'insert'
+
+        c1 = text.get(left)
+        c2 = text.get(right)
+
+        if c1 in LEFT and c2 == pair(c1):
+            text.undo_block_start()
+            text.delete(right)
+            text.delete(left)
+            text.undo_block_stop()
             return 'break'
