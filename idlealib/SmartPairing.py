@@ -1,6 +1,5 @@
 '''匹配输入和删除成对括号'''
 
-# TODO 选中单侧括号并修改时同时修改匹配括号
 
 if __name__ == '__main__':
     import __init__
@@ -12,25 +11,36 @@ RIGHT = ')]}'
 pair = lambda c: ')]}\'"'['([{\'"'.index(c)]
 
 
+def GetSpan(text):
+    sel = text.tag_ranges('sel')
+    left = 'sel.first' if sel else 'insert'
+    right = 'sel.last' if sel else 'insert'
+    return left, right
+
+
 class SmartPairing:
     def __init__(self, parent):
         self.text = parent.text
         for c in LEFT + RIGHT:
             self.text.bind('<%s>' % c, self.PairAdd)  # '<KeyRelease-%s>'%c
-        self.text.bind('<BackSpace>', self.PairDelete)
+        self.text.bind('<BackSpace>', self.OnBackSpace)
 
     def PairAdd(self, evt):
         c = evt.char
         text = self.text
 
         if c in LEFT: # 输入左括号时输入匹配右括号，允许含有选区
+            text.undo_block_start()
+
+            if text.tag_ranges('sel'):
+                c1 = text.get('sel.first')
+                if c1 in LEFT and c1 != c and ((c1 in '([{') ^ (c in '\'"')):
+                    self.PairDelete()
+
             sel = text.tag_ranges('sel')
             left = 'sel.first' if sel else 'insert'
             right = 'sel.last' if sel else 'insert'
 
-            text.undo_block_start()
-            if sel and text.get(left) != c:
-                self.PairDelete(-1)
             text.insert(left, c)
             text.mark_gravity('insert', 'left')
             text.insert(right, pair(c))
@@ -43,7 +53,7 @@ class SmartPairing:
                 text.mark_set('insert', 'insert+1c')
                 return 'break'
 
-    def PairDelete(self, evt): # 删除左括号时同时删除右括号
+    def PairDelete(self): # 删除左括号时同时删除右括号
         text = self.text
 
         sel = text.tag_ranges('sel')
@@ -58,4 +68,9 @@ class SmartPairing:
             text.delete(right)
             text.delete(left)
             text.undo_block_stop()
-            return 'break'
+            return True
+
+    def OnBackSpace(self, evt):
+        if not self.PairDelete():
+            self.text.event_generate('<<smart-backspace>>')
+        return 'break'
