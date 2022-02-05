@@ -15,16 +15,17 @@ class RunMultiLine:
         if hasattr(parent, 'write'): # is shell?
             self.parent = parent
             self.text = parent.text
-            # self.text.bind('<Control-m>', self.Setup)
-            self.text.bind('<<Paste>>', self.AfterPaste, '+') # Ref: IDLEX TODO 加号的作用是？？？
+            self.text.bind('<<Paste>>', self.AfterPaste, add=True)
 
-    def AfterPaste(self, e):
+    def AfterPaste(self, evt):
         self.text.after(10, self.Setup)
 
-    def Setup(self, e=0):
-        self.codes = self.text.get('iomark', 'end-1c').split('\n')
-        self.text.delete('iomark', 'end-1c')
-        self.text.after(10, self.Run)
+    def Setup(self):
+        text = self.text
+        self.codes = text.get('iomark', 'end-1c').split('\n')
+        if len(self.codes) > 1 and text.index('insert') == text.index('end-1c'): # 多行复制且光标在最后
+            text.delete('iomark', 'end-1c')
+            text.after(10, self.Run)
 
     def Run(self): # See: idlelib.pyshell.PyShell.enter_callback
         p = self.parent
@@ -42,4 +43,3 @@ class RunMultiLine:
                 text.delete('end-1l', 'end-1c') # delete auto indent spaces.
             text.see('insert')
             text.after(10, self.Run)
-
