@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Lishixian (znsoooo). All Rights Reserved.
+# Copyright (c) 2021-2022 Lishixian (znsoooo). All Rights Reserved.
 #
 # Distributed under MIT license.
 # See file LICENSE for detail or copy at https://opensource.org/licenses/MIT
@@ -14,7 +14,6 @@
 
 import os
 import sys
-import time
 
 PY36 = sys.version_info > (3, 6)
 EXTENSIONS = []
@@ -146,11 +145,6 @@ class MyIOBinding(IOBinding):
         # F5保存时，调用idlelib.runscript.getfilename()，设置自动保存时进入self.editwin.io.save(None)进行保存
         self.save = wrap_function(self.save, editwin.before_save, editwin.after_save)
         IOBinding.__init__(self, editwin)
-
-    def defaultfilename(self, mode="open"):
-        if not self.filename:
-            return self.dirname, time.strftime('Untitled_%Y%m%d_%H%M%S.py')
-        return super().defaultfilename(mode)
 
 
 if PY36:
