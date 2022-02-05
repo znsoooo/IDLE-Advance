@@ -61,7 +61,6 @@ class RunSelected(tk.Menu):
 
     def Binding(self):
         text = self.text
-        text.bind('<F6>', lambda e: self.Run(SRC_ST, INS_ST))
-        text.bind('<F7>', lambda e: self.Run(SEL_ST, SEL_ED))
-        text.bind('<F8>', lambda e: self.Run(INS_ST, SRC_ED))
-        text.bind('<Shift-F5>', lambda e: self.Run(SRC_ST, SRC_ED))
+        text.bind('<Shift-F5>', lambda e: self.Run(SEL_ST, SEL_ED) if text.tag_ranges('sel') else self.Run(SRC_ST, SRC_ED))
+        text.bind('<Shift-F6>', lambda e: self.Run(SRC_ST, INS_ST))
+        text.bind('<Shift-F7>', lambda e: self.Run(INS_ST, SRC_ED))
