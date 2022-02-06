@@ -1,16 +1,17 @@
-## Today
-- version自动编号增加
+## Todo
+- 纵向选择
+- 比较引擎显示更新
+- help引擎
+- 纵向选择
 
 ### Features
 X 记录shell历史记录到文件
 X shell自由编辑模式（F12）
 
 ### Fix
-- 快速创建快捷方式（context_helper.pyw）
-- 兼容py34
+- .idlerc路径读取问题
 - 修复自动括号匹配的使用体验
-- 内建搜索窗口不置顶
-- 比较选中的文本和剪切板内容（CompareFile.py）
+- 把各个插件的文件读写需求情况写明
 
 
 ## TODO NOTE
