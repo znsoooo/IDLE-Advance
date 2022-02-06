@@ -24,20 +24,12 @@ PY36 = sys.version_info > (3, 6)
 if PY36:
     from idlelib import searchengine
     from idlelib.replace import ReplaceDialog
-    from idlelib.searchbase import SearchDialogBase
+    from idlelib.search import _setup
 else:
     import idlelib.SearchEngine as searchengine
     from idlelib.ReplaceDialog import ReplaceDialog
-    from idlelib.SearchDialogBase import SearchDialogBase
+    from idlelib.SearchDialog import _setup
 
-
-def _open(self, text, string=None):
-    text.event_generate('<<replace-bar-show>>')
-    if string:
-        self.engine.setpat(string)
-
-
-SearchDialogBase.open = _open # hack dialog open function
 
 jn = lambda x,y: '%i.%i'%(x,y) # Good!
 lc = lambda s: jn(s.count('\n')+1, len(s)-s.rfind('\n')-1) # Good!
@@ -58,6 +50,10 @@ class ReplaceBar(tk.Frame):
         replace.ok = 1
         replace.bell = parent.top.bell
 
+        # class `SearchDialog` is separate with `ReplaceDialog`
+        search = _setup(self.text)
+        search.open = self.Open
+
         engine.patvar .trace('w', self.Update)
         engine.revar  .trace('w', self.Update)
         engine.casevar.trace('w', self.Update)
@@ -69,6 +65,7 @@ class ReplaceBar(tk.Frame):
         t1.pack(side='left', fill='x', expand=True)
         tk.Label(self, text='Repl:').pack(side='left')
         t2.pack(side='left', fill='x', expand=True)
+        self.t1 = t1
 
         self.tip = tk.Label(self, text=' Match: 0')
         self.tip.pack(side='left')
@@ -82,17 +79,28 @@ class ReplaceBar(tk.Frame):
         tk.Button(self, relief='groove', text='Replace', command=self.Replace).pack(side='left')
         tk.Button(self, relief='groove', text='Replace All', command=self.ReplaceAll).pack(side='left')
 
-        self.text.bind('<<replace-bar-show>>', self.Show)
+        self.text.bind("<<replace>>", self.OnReplace)
+
         self.text.bind('<Key-Escape>', self.Hide)
-        # self.text.event_add('<<replace-bar-show>>', '<Key-Escape>') # add event but not clear exist bindings.
         t1.bind('<Escape>', self.Hide)
         t2.bind('<Escape>', self.Hide)
 
-    def Show(self, evt):
+    def OnReplace(self, evt):
+        self.text.event_generate('<<find>>')
+        return 'break'
+
+    def Open(self, evt, string=None):
         if PY37:
             self.grid(row=3, column=1, sticky='nsew')
         else:
             self.pack(fill='x', side='bottom')
+
+        if string:
+            self.engine.setpat(string)
+        self.t1.focus()
+        self.t1.select_range(0, 'end') # don't use `t1.select_to('end')`. 选中区域为空时，输入字符后无法删除（移动光标后可以删除）
+        self.t1.icursor('end')
+
         self.Update()
 
     def Hide(self, evt):
