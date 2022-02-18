@@ -183,6 +183,7 @@ class MyEditorWindow(EditorWindow):
         self.close = wrap_function(self.close, before=self.after_close)  # "<<close-window>>"事件不命中点击窗口关闭事件
 
         EditorWindow.__init__(self, *args)
+        self.text.tag_lower('hit', 'sel') # fix can't highlight text in sys.stdout
 
         self.amenu = self.menudict['advance']
         self.make_rmenu() # make "self.rmenu"
