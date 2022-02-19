@@ -23,7 +23,7 @@ class RunArgs:
     def Run(self): # TODO 有没有更优雅的方法？
         args = askstring('Run with args', 'args:', parent=self.root)
         if args is not None:
-            self.text.insert('1.0', "__import__('sys').argv.append(%r)\n\n" % args)
+            self.text.insert('1.0', "__import__('sys').argv.extend(%r.split())\n\n" % args)
             self.gotoline(1)
 
 
