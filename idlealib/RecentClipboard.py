@@ -62,7 +62,9 @@ class RecentClipboard(tk.Menu):
         return s2, paste
 
     def Post(self, e):
-        self.post(e.x_root, e.y_root) # TODO 参考calltip_w.py获取光标的当前位置并弹出窗口
+        x0, y0 = self.text.winfo_rootx(), self.text.winfo_rooty()
+        x, y, w, h = self.text.bbox('insert')
+        self.post(x0 + x, y0 + y + h)
 
     def Binding(self):
         self.text.bind('<Control-Shift-V>', self.Post)
