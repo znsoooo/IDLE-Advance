@@ -18,6 +18,10 @@ class ClearShell:
             parent.add_adv_menu('Clear shell', self.Clear)
 
     def Clear(self):
+        if self.text.tag_ranges('sel'):
+            self.text.delete('sel.first', 'sel.last')
+            return
+
         find = False
         for tag in ['stdout', 'stderr']:
             ranges = self.text.tag_ranges(tag)
