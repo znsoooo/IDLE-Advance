@@ -16,15 +16,20 @@ class RunArgs:
 
         self.text = parent.text
         self.root = parent.root
-        self.gotoline = parent.gotoline
+        self.flist = parent.flist
 
         parent.add_adv_menu('Run with args', self.Run, sp=True)
 
-    def Run(self): # TODO 有没有更优雅的方法？
+    def Run(self):
         args = askstring('Run with args', 'args:', parent=self.root)
         if args is not None:
-            self.text.insert('1.0', "__import__('sys').argv.extend(%r.split())\n\n" % args)
-            self.gotoline(1)
+            cmd = "__import__('sys').argv.extend(%r.split())" % args
+            shell = self.flist.open_shell()
+            interp = shell.interp
+            interp.runcommand(cmd)
+            interp._runcode = interp.runcode
+            interp.runcode = lambda evt: [interp.runcommand(cmd), interp._runcode(evt)]
+            self.text.event_generate('<<run-module>>')
 
 
 if __name__ == '__main__': # for test
