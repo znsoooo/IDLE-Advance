@@ -73,9 +73,17 @@ def Selecting(e):
     elif c == '\n':
         Select(text, 'current linestart', 'current linestart+1l')
 
-    elif c == ' ': # TODO 前导空格快速选中区块
-        p1, p2 = MatchSpan(r' +', line, col)
-        Select(text, 'current linestart+%dc' % p1, 'current linestart+%dc' % p2)
+    elif c == ' ':
+        indent = re.match(r' *', line).end()
+        if col < indent:
+            ss = text.get('current linestart+1l', 'end').split('\n')
+            for r, row in enumerate(ss):
+                if code(row[:indent + 1]):
+                    break
+            Select(text, 'current linestart', 'current linestart+%dl' % (r + 1))
+        else:
+            p1, p2 = MatchSpan(r' +', line, col)
+            Select(text, 'current linestart+%dc' % p1, 'current linestart+%dc' % p2)
 
     elif c in '\'"': # quote in comment
         s = text.get('current+1c', 'end')
