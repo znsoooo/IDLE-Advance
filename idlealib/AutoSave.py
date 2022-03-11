@@ -29,14 +29,16 @@ class AutoSave:
 
     def Backup(self, loop=True):
         filename = self.io.filename
+        if not self.io.text: # will set as None in io.close()
+            return # break loop only editor closed
         if filename:
             filename_bak = os.path.splitext(filename)[0] + '.pybak'
-            if self.get_saved(): # TODO 当文件关闭后会再运行一次，会在这里获取判断失败
+            if self.get_saved():
                 if os.path.isfile(filename_bak):
                     os.remove(filename_bak)
             else:
                 self.io.writefile(filename_bak)
-        if loop:
+        if loop: # don't stop loop while no filename, new file maybe saved later
             self.root.after(TICK, self.Backup)
 
     def AfterSave(self):
