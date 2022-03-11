@@ -41,6 +41,7 @@ class ReplaceBar(tk.Frame):
 
         self.root = parent.root
         self.text = parent.text
+        self.text.replace_bar = self # hook
 
         self.engine = engine = searchengine.get(self.root)
         self.replace = replace = ReplaceDialog(self.root, engine)
@@ -89,19 +90,18 @@ class ReplaceBar(tk.Frame):
         self.text.event_generate('<<find>>')
         return 'break'
 
-    def Open(self, evt, string=None):
+    def Open(self, text, string=None):
+        bar = text.replace_bar
         if PY37:
-            self.grid(row=3, column=1, sticky='nsew')
+            bar.grid(row=3, column=1, sticky='nsew')
         else:
-            self.pack(fill='x', side='bottom')
+            bar.pack(fill='x', side='bottom')
 
         if string:
-            self.engine.setpat(string)
-        self.t1.focus()
-        self.t1.select_range(0, 'end') # don't use `t1.select_to('end')`. 选中区域为空时，输入字符后无法删除（移动光标后可以删除）
-        self.t1.icursor('end')
-
-        self.Update()
+            bar.engine.setpat(string)
+        bar.t1.focus()
+        bar.t1.select_range(0, 'end')  # don't use `t1.select_to('end')`. 选中区域为空时，输入字符后无法删除（移动光标后可以删除）
+        bar.t1.icursor('end')
 
     def Hide(self, evt):
         if PY37:
