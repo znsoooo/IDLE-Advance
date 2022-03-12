@@ -91,15 +91,17 @@ class CalltipSelect:
     def open_calltip(self, e):
         self.ctip._open_calltip(False)
         self.first = False
-        self.text.bind('<FocusOut>', print) # unbind auto hide. TODO 运行完移除，注意别的影响
+        self.text.unbind('<FocusOut>') # unbind auto hide. TODO 运行完移除，注意别的影响
 
         calltip = self.ctip.active_calltip
-        self.top   = calltip.tipwindow
-        self.label = calltip.label
-        self.s     = calltip.text
 
-        self.top.update()
-        self.Label2Text(self.s)
+        if calltip:
+            self.top   = calltip.tipwindow
+            self.label = calltip.label
+            self.s     = calltip.text
+
+            self.top.update()
+            self.Label2Text(self.s)
 
     def Label2Text(self, s):
         if self.first:
@@ -109,6 +111,7 @@ class CalltipSelect:
         self.label.forget()
         text2 = tk.Text(self.top, background='#ffffe0', relief='solid', borderwidth=1, font=self.text['font'])
         text2.insert('1.0', s)
+        text2.config(state='disabled')
         text2.pack(expand=1, fill='both')
         # TODO 没有双击选中了
 
