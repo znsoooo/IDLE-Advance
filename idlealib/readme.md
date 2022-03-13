@@ -9,6 +9,9 @@
 - __\_\_main\_\_.py__  
 主程序入口
 
+- __About.py__  
+显示版本信息和自动升级
+
 - __AutoReload.py__  
 重载文件
 
@@ -36,6 +39,15 @@
 - __FileManager.py__  
 文件操作
 
+- __HelpViewer.py__  
+帮助查看器
+
+- __PrintCr.py__  
+打印回车符换成换行符
+
+- __QuickOpen.py__  
+快速打开选中的文本
+
 - __QuickSearch.py__  
 快速正反搜索
 
@@ -51,6 +63,9 @@
 - __ReplaceBar.py__  
 搜索替换工具条
 
+- __RunArgs.py__  
+带参数运行
+
 - __RunMultiLine.py__  
 Shell多行运行
 
@@ -63,14 +78,20 @@ Shell多行运行
 - __SaveArchive.py__  
 记录备份
 
+- __SaveUntitled.py__  
+自动保存Untitled
+
 - __ScrollHorizontal.py__  
 横向滚动条
+
+- __SelectVertical.py__  
+纵向选择
 
 - __SmartCopy.py__  
 仅拷贝Shell的代码
 
 - __SmartPairing.py__  
-匹配成对括号
+匹配输入和删除成对括号
 
 - __SmartSelect.py__  
 智能选取
@@ -83,3 +104,6 @@ Shell多行运行
 
 - __WindowManager.py__  
 窗口操作
+
+- __WrapShell.py__  
+Shell换行

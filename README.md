@@ -5,68 +5,64 @@
 - __Python:__ >= Python 3.4
 - __Author:__ Lishixian (znsoooo)
 - __Github:__ https://github.com/znsoooo/IDLE-Advance
-- __License:__ MIT License. Copyright (c) 2021 Lishixian (znsoooo). All Rights Reserved.
+- __License:__ MIT License. Copyright (c) 2022 Lishixian (znsoooo). All Rights Reserved.
 
 
 ## What is it?
 - `IDLE-Advance`  add some useful extensions base on `idlelib`. It can be work on any platform where `IDLE` can be work.
 - See `~/idlealib/readme.md` to get spec of each extension. It is same as open each script and watch \_\_doc__.
-- Stop extension(s) by move script(s) to `nouse` folder.
-- It will generate `.pybak` file in script folder, and `recent-saved.lst` in userdir. Make sure no important files will be overwritten.
+- Stop extension(s) by moveing script(s) to `nouse` folder.
+- It will generate `.pybak` file in script folder, and `recent-saved.lst` in `userdir`. So make sure no important files will be overwritten.
 
 
 ## How to use?
 
 ### Run directly
-It is same as run such file by `python`/`pythonw`:
-```
+It is same as run such file by `python` or `pythonw`:
+```bash
 ~/run.py  
 ~/idlealib/__main__.py  
 ~/idlealib/scripts/run.py
 ```
 
 ### Install by pip
-```
-pip install idlea
-```
-
-or upgrade:
-```
+```bash
 pip install idlea --upgrade
 ```
 
-install `windnd` for drag-open feature:
-```
+install `windnd` and `qrcode` for `drag-open` and `code-share` feature:
+```bash
 pip install windnd
+pip install qrcode
 ```
 
 ### Install by source
-```
+```bash
 python setup.py install
 ```
 
 ### Run script in shell
 Script in Python folder `~/Scripts`:
-```
+```bash
 idlea
 ```
 
 ### Run module as script
-```
+```bash
 python -m idlealib
 ```
 
 ### Run module in python
-```
+```python
 import idlealib
 idlealib.run()
 ```
 
 ### Run unit test of one extension
-Open any `.py` file in `~/idlealib` folder directly.
+Open any `~/idlealib/*.py` file directly.
 
 ### Stop extension(s)
-Move stopped script file to `~/nouse` folder and restart `IDLE-Advance`.
+Move stopped script file to `~/nouse` folder and restart `idlea`.
 
 
 ## How to Set?
@@ -75,7 +71,7 @@ Move stopped script file to `~/nouse` folder and restart `IDLE-Advance`.
 Make shortcut to Desktop and Startup Menu.  
 Open the GUI config helper and setting:
 
-```
+```bash
 ~/idlealib/scripts/context_helper.pyw
 ```
 
@@ -83,7 +79,7 @@ Open the GUI config helper and setting:
 Make shortcut of `~/idlealib/__main__.py` to Desktop or Startup Menu folder or anywhere.
 
 ### Add to right-click menu (only windows)
-Create `path` in Regedit:
+Create `path` in `regedit`:
 ```
 HKEY_CURRENT_USER\Software\Classes\Python.File\Shell\Edit with IDLE-Adv\command
 ```
@@ -111,7 +107,7 @@ and set `value` as:
 
 ### 笔者的话
 
-- 本项目（IDLE-Advance）和另一个IDLEX的开发项目（ http://idlex.sourceforge.net ）没有关联！
+- 本项目（IDLE-Advance）和另一个[IDLEX](http://idlex.sourceforge.net)的开发项目没有关联！
 - 由于该项目停止维护已久（2012年），并且该项目使用者的主要功能提升是增加了可以显示代码行号。
 - 但是我认为IDLE本来在窗口的右下角就有显示行号，甚至在新版的python中，可选的显示行号功能直接增加为了新的feature（py3.9）。
 - 所以笔者不在前人的轮子基础上继续修改，而是选择重新造一个轮子。
@@ -122,7 +118,7 @@ and set `value` as:
 - 众所周知，Python安装自带IDLE，是一个轻量级的编辑器，比命令行的python和记事本打开修改py文件的调试效率高了无数倍，甚至还有断点和单步调试的功能。
 - 但是那么多人使用PyCharm等第三方编译环境也不是没有道理的，PyCharm中的很多便捷操作确实很实用，但是毕竟PyCharm实在是太大了（300MB+）。
 - 抱着IDLE发展了20+年，也一直有人在用的打算，这个轮子应该不会马上被抛弃。增强IDLE的功能，通过一些简单但实用的功能，增加IDLE的生命力，让坚守者可以坚持得更久一点（？）。
-- 本工程代码中有大量的“TODO”标记，如果希望贡献意见，可以在GitHub上提交修改。不过GitHub我不太会用，修改代码前最好留言说明，或者发送给我邮件：11313213@qq.com ，非常感谢您的贡献！
+- 本工程代码中有大量的`TODO`标记，如果希望贡献意见，可以在GitHub上提交修改。不过GitHub我不太会用，修改代码前最好留言说明，或者发送给我邮件：11313213@qq.com ，非常感谢您的贡献！
 
 
 ### 使用方法
@@ -141,43 +137,49 @@ and set `value` as:
 - [x] 查找替换工具条（搜索记录、大小写匹配、全字匹配、正则、匹配数量、修改动态显示、所有匹配结果高亮、只替换选中的区域、上下条、多文件搜索）
 
 ★★★★（Useful）
+- [x] 横向滚动条
 - [x] 历史剪切版
-- [x] 快速加括号、引号、方括号/快速拆括号
+- [x] 快速添加/删除括号
 - [x] 双击选中（选中括号内的内容、引号中的内容、注释内容、连续空格）
 - [x] 双击左侧空白选中代码块
+- [x] 检测文件变化重新加载
 - [x] 打开时回到上次编辑的位置
-- [x] 可选中的Calltips窗口（经过时显示完整doc/help查看器）
-- [x] 显示最近打开的修改过的文件
+- [x] 不保存运行当前脚本（Shift+F5）
+- [x] 自动恢复未保存NewFile的内容
 - [x] 未选中文本时，复制/剪切选中当前行
+- [x] 文本纵向选择
 
 ★★（Good）
 - [x] 打开脚本所在目录/终端打开脚本所在目录/拷贝脚本所在路径、完整路径、文件名/插入脚本路径
 - [x] 运行选中的代码（自动缩进调整）/运行到光标位置/从光标位置开始运行
-- [x] 检测文件变化重新加载
 - [x] 复制文件名/打开路径/插入文件名、重新加载、修改文件名
 - [x] 快捷反向查找（F3/Shift+F3）
 - [ ] 内建搜索窗口置顶但不捕捉
-- [x] 自动备份/定时备份/打开时恢复未保存记录（script.pybak/script@time.py）
-- [x] 自动保存untitled的内容
-- [x] 横向滚动条
+- [x] 自动备份/定时备份/打开时恢复未保存记录
 - [x] 拖拽打开文件
 - [x] 二维码分享代码
 - [x] 交换位置复制（Ctrl+Shift+X）
 - [x] 自动补全保留关键词
+- [ ] 快速大小写转换
+- [x] 可选中Calltips中的文本
+- [x] 选中变量帮助查看器
 
 ★（Better）
 - [x] 快捷键窗口循环切换/恢复页面/关闭窗口(并激活下一个窗口)/关闭全部
+- [x] 显示最近打开的修改过的文件
+- [x] 带参数运行脚本
+- [x] 快速打开资源文件
+- [x] 模拟打印\r效果
 - [x] 版本比较（基于difflib）
 - [x] 快速输入当前时间戳注释文本
 - [ ] 按照剪切板文本搜索
 - [ ] 取消关闭窗口后清空剪切板
-- [x] 带参数运行脚本
 
 ☆（Shell）
 - [x] 多行运行
 - [x] 魔法复制
 - [x] 执行记录新建为脚本
-- [x] 清空Shell所有输出、清空Shell所有内容
+- [x] 清空Shell或Shell选中的内容
 - [x] 自动换行切换
 - [ ] 本地记录历史操作
 
@@ -187,10 +189,10 @@ and set `value` as:
 - [x] 兼容py34
 - [ ] 扩展管理器（开关和配置热键）
 - [ ] 检查更新
-- [ ] 关于框
+- [x] 关于框
 - [x] 快捷启动器
 - [x] 快捷部署器（右键菜单/右键新建/桌面和开始菜单快捷方式）
-- [x] 一键打开Github网页项目
+- [ ] 一键打开Github网页项目
 - [x] 汇总打印扩展简要说明
 - [x] 添加Scripts脚本
 - [x] 支持包模式运行
@@ -204,7 +206,6 @@ and set `value` as:
 
 ×（Forget）
 - [ ] 注释后移动到下一行
-- [ ] help查看器
 - [ ] Shell自由编辑模式（F12）
 
 
@@ -216,7 +217,7 @@ and set `value` as:
 - [x] 调试运行到光标位置
 - [x] 自动换行
 - [ ] 快速换行（Shift+Enter）
-- [ ] 快速大小写转化（Ctrl+Shift+U）
+- [x] 快速大小写转化（Ctrl+Shift+U）
 - [ ] 代码折叠
 - [x] 历史剪切版
 - [ ] 书签
@@ -234,7 +235,7 @@ and set `value` as:
 - [ ] 代码滚动预览
 - [ ] 储存操作记录（历史编辑文件）
 - [ ] 输入时自动匹配（下拉菜单、忽略大小写）
-- [ ] 文本纵向选中
+- [x] 文本纵向选中
 - [ ] 代码重构：变量重命名、函数重命名（使用替换、全字匹配、区域替换等）
 - [x] 打开脚本所在目录
 - [x] 终端打开脚本所在目录
