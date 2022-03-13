@@ -1,0 +1,2 @@
+import idlealib
+idlealib.run()
