@@ -16,7 +16,8 @@ import os
 import sys
 
 PY36 = sys.version_info > (3, 6)
-EXTENSIONS = []
+# `abspath` for open in cmd like `python __init__.py` to open script.
+EXTENSIONS = os.listdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 # - Functions ----------------------------------------
@@ -251,28 +252,26 @@ else:
     from idlelib.PyShell import main
 
 
-def run(filename=None, exts=()):
+def run(ext=None, filename=None):
+    if ext:
+        EXTENSIONS.clear()
+        EXTENSIONS.append(ext)
     fix_path()
-    EXTENSIONS.extend(exts)
-    if not EXTENSIONS:
-        # `abspath` for open in cmd like `python __init__.py` to open script.
-        EXTENSIONS.extend(file for file in os.listdir(os.path.dirname(os.path.abspath(__file__))))
     if filename:
-        import sys
         sys.argv.append(filename) # Idea from "~\Lib\tkinter\__main__.py"
     main()
 
 
-def test_editor(script_file):
-    run(script_file, [script_file])
+def test_editor(script):
+    run(script, script)
 
 
-def test_shell(script_file):
-    run(None, [script_file])
+def test_shell(script):
+    run(script)
 
 
 if __name__ == '__main__':
-    run(__file__)
+    run(None, __file__)
 
 
 '''

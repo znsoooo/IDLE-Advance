@@ -1,6 +1,6 @@
-'''主程序入口'''
+"""主程序入口"""
 
-# Useage: python -m idlealib
+# Usage: python -m idlealib
 
 
 def FixPath():
