@@ -34,7 +34,7 @@ setuptools.setup(
         'License :: OSI Approved :: MIT License',
         'Topic :: Text Editors :: Integrated Development Environments (IDE)',
     ],
-    packages=setuptools.find_packages(),
+    packages=['idlealib', 'idlealib.docs', 'idlealib.nouse', 'idlealib.scripts'],
     python_requires='>=3.4',
 
     # install_requires=['windnd'], # for drag-open file feature
