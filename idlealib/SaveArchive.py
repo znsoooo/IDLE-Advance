@@ -28,5 +28,5 @@ class SaveArchive:
         parent.before_save.append(self.Saving)
 
     def Saving(self):
-        if not self.get_saved():
+        if self.io.filename and not self.get_saved():
             self.io.writefile(StampFile(self.io.filename))
