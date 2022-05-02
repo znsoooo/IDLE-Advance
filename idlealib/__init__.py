@@ -235,6 +235,13 @@ class MyEditorWindow(EditorWindow):
         print('tag_names:', self.text.tag_names())
         print('functions:', ' '.join(v for v in dir(self.text) if 'tag' in v or 'mark' in v))
 
+        print('wrapped functions:')
+        for f1 in ('copy', 'save', 'close'):
+            for f2 in ('before', 'after'):
+                f3 = f2 + '_' + f1
+                if hasattr(self, f3):
+                    print(f3 + ':', ['%s.%s' % (f.__module__, f.__name__) for f in getattr(self, f3)])
+
 
 if PY36:
     idlelib.editor.EditorWindow = MyEditorWindow
