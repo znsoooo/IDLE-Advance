@@ -179,9 +179,9 @@ class MyEditorWindow(EditorWindow):
         self.before_close = []
 
         # must before text binding, so before `EditorWindow.__init__()`
-        self.cut   = wrap_function(self.cut, before=self.before_copy)  # same as `copy`
-        self.copy  = wrap_function(self.copy, before=self.before_copy)
-        self.close = wrap_function(self.close, before=self.before_close)  # "<<close-window>>"事件不命中点击窗口关闭事件
+        self.cut = wrap_function(self.cut, before=self.before_copy)  # same as `copy`
+        self.copy = wrap_function(self.copy, before=self.before_copy)
+        self._close = wrap_function(self._close, before=self.before_close)  # "<<close-window>>"事件不命中点击窗口关闭事件
 
         EditorWindow.__init__(self, *args)
         self.text.tag_lower('hit', 'sel') # fix can't highlight text in sys.stdout
@@ -193,11 +193,6 @@ class MyEditorWindow(EditorWindow):
 
         self.load_adv_extensions()
         self.text.bind('<F12>', self.test)
-
-    def _close(self):
-        print('handle with edit _close:', self.io.filename)
-        super()._close()
-        # raise # TODO 是否还有别的方法阻止清空剪切
 
     def add_adv_menu(self, label, sub, index='end', sp=False):
         menu = self.menudict['advance']
