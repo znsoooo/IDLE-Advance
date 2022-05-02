@@ -21,7 +21,7 @@ class SaveUntitled:
         self.io = parent.io
         self.get_saved = parent.get_saved  # function
 
-        parent.after_close.append(self.Backup) # TODO 关闭时选择取消会也会调用
+        parent.before_close.append(self.Backup) # TODO 关闭时选择取消会也会调用
         self.Reload()
 
     def Backup(self):

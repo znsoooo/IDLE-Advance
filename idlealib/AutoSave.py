@@ -25,7 +25,7 @@ class AutoSave:
 
         self.AfterOpen()
         parent.after_save.append(self.AfterSave)
-        parent.after_close.append(self.AfterClose)
+        parent.before_close.append(self.BeforeClose)
 
     def Backup(self, loop=True):
         filename = self.io.filename
@@ -44,7 +44,7 @@ class AutoSave:
     def AfterSave(self):
         self.Backup(False)
 
-    def AfterClose(self):
+    def BeforeClose(self):
         self.Backup(False)
 
     def AfterOpen(self): # TODO 恢复存档

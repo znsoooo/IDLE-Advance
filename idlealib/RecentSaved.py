@@ -61,7 +61,7 @@ class RecentSaved:
         self.io = parent.io
         self.AfterOpen()
         parent.after_save.append(self.OnSave)
-        parent.after_close.append(self.OnClose)
+        parent.before_close.append(self.OnClose)
 
     def AfterOpen(self):
         if not self.io.filename:

@@ -176,12 +176,12 @@ class MyEditorWindow(EditorWindow):
         self.before_copy = []
         self.after_save  = []
         self.before_save = []
-        self.after_close = []
+        self.before_close = []
 
         # must before text binding, so before `EditorWindow.__init__()`
         self.cut   = wrap_function(self.cut, before=self.before_copy)  # same as `copy`
         self.copy  = wrap_function(self.copy, before=self.before_copy)
-        self.close = wrap_function(self.close, before=self.after_close)  # "<<close-window>>"事件不命中点击窗口关闭事件
+        self.close = wrap_function(self.close, before=self.before_close)  # "<<close-window>>"事件不命中点击窗口关闭事件
 
         EditorWindow.__init__(self, *args)
         self.text.tag_lower('hit', 'sel') # fix can't highlight text in sys.stdout
