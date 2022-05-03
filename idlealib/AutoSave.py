@@ -21,11 +21,21 @@ class AutoSave:
         self.io = parent.io
         self.get_saved = parent.get_saved # function
 
+        self.fixfixlastline()
+
         self.root.after(TICK, self.Backup)
 
         self.AfterOpen()
         parent.after_save.append(self.AfterSave)
         parent.before_close.append(self.BeforeClose)
+
+    def fixfixlastline(self): # append '\n' at last line **after** cursor
+        def fixlastline2():
+            self.text.mark_gravity('insert', 'left')
+            fixlastline()
+            self.text.mark_gravity('insert', 'right')
+        fixlastline = self.io.fixlastline
+        self.io.fixlastline = fixlastline2
 
     def Backup(self, loop=True):
         filename = self.io.filename
