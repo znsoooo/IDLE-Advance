@@ -1,15 +1,15 @@
-# Copyright (c) 2021-2022 Lishixian (znsoooo). All Rights Reserved.
-#
-# Distributed under MIT license.
-# See file LICENSE for detail or copy at https://opensource.org/licenses/MIT
+"""IDLE-Advance: IDLE Useful Extensions
 
-
-'''
 运行__main__.py获得一个加载所有插件的IDLE-Advance的示例文件。
 运行__init__.py获得一个打开自身脚本并加载所有插件的editor的例子。
 分别运行idlealib目录下的扩展文件，可以得到一个打开自身的editor或shell的例子。
 如果需要停用部分扩展，将对应的脚本移出目录后重启IDLE即可。
-'''
+
+See also: https://github.com/znsoooo/IDLE-Advance
+
+MIT license. Copyright (c) 2021-2022 Lishixian (znsoooo). All Rights Reserved.
+
+"""
 
 
 import os
@@ -18,6 +18,13 @@ import sys
 PY36 = sys.version_info > (3, 6)
 # `abspath` for open in cmd like `python __init__.py` to open script.
 EXTENSIONS = os.listdir(os.path.dirname(os.path.abspath(__file__)))
+
+__author__  = 'Lishixian <lsx7@sina.com>'
+__credits__ = 'See at: https://github.com/znsoooo/IDLE-Advance'
+__date__    = '2022'
+__version__ = '1.2'
+
+__all__ = ['run', 'test_editor', 'test_shell', 'PY36']
 
 
 # - Functions ----------------------------------------
@@ -113,11 +120,11 @@ if sys.version_info < (3, 8):
         from idlelib.AutoComplete import AutoComplete
 
     import keyword
-    ATTRS = 1 if sys.version_info < (3, 7) else 0
 
     class MyAutoComplete(AutoComplete):
         def fetch_completions(self, what, mode):
             ret = super().fetch_completions(what, mode)
+            ATTRS = int(sys.version_info < (3, 7))
             if mode == ATTRS and what == '':
                 for lst in ret[:2]:
                     lst.extend(v for v in keyword.kwlist if v not in lst) # `None/True/False` are repetitive.
