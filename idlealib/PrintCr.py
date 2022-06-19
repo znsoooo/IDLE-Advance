@@ -20,6 +20,7 @@ class PrintCr:
             self._write, parent.write = parent.write, self.write
 
     def write(self, s, tags=()):
+        s = s.replace('\r\n', '\n')
         if '\r' in s and CLEAR_LINE: # 清除行和替换为换行两种模式选择
             self.text.delete('iomark linestart', 'iomark lineend')
             s = re.sub(r'.*\r', '', s)
