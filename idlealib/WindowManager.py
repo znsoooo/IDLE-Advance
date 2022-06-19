@@ -33,6 +33,10 @@ class WindowManager(tk.Menu):
         index = windows.index(self.parent)
         window = windows[(index + n) % len(windows)]
         window.top.wakeup()  # See at: idlelib.window.WindowList.add_windows_to_menu
+        return 'break' # 避免窗口左右移动
+
+    def OnNew(self, *args):
+        self.text.event_generate('<<open-new-window>>')
 
     def OnClose(self, *args):
         self.OnNext(-1)
@@ -42,6 +46,7 @@ class WindowManager(tk.Menu):
         self.text.event_generate('<<close-all-windows>>')
 
     def MakeMenu(self):
+        self.add_command(label='New Window',        command=self.OnNew)
         self.add_command(label='Restore Window',    command=self.OnRestore)
         self.add_separator()
         self.add_command(label='Prev Window',       command=lambda: self.OnNext(-1))
@@ -52,6 +57,7 @@ class WindowManager(tk.Menu):
 
     def Binding(self):
         text = self.text
+        text.bind('<Control-t>',       self.OnNew)
         text.bind('<Control-Shift-T>', self.OnRestore)
         text.bind('<Control-Prior>',   lambda e: self.OnNext(-1))
         text.bind('<Control-Next>',    lambda e: self.OnNext(1))
