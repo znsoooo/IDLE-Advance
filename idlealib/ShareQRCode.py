@@ -41,7 +41,7 @@ class ViewWindow(tk.Toplevel):
         self.bind('<Escape>', lambda e: self.destroy())
 
 
-class SahreQRCode:
+class ShareQRCode:
     def __init__(self, parent):
         self.text = parent.text
         self.top = parent.top
