@@ -115,12 +115,17 @@ class ReplaceBar(tk.Frame):
         self.text.tag_remove('hit', '1.0', 'end')
         self.tip.config(text=' Match: 0')
 
-        if not self.engine.getpat():
+        # banning show error report temporarily
+        _report_error = self.engine.report_error
+        self.engine.report_error = lambda *v: None
+        prog = self.engine.getprog()
+        self.engine.report_error = _report_error
+
+        if not prog:
             return
 
         s = self.text.get('1.0', 'end-1c')
         insert = len(self.text.get('1.0', 'insert'))
-        prog = self.engine.getprog()
         matchs = [m.span() for m in prog.finditer(s)]
         self.tip.config(text=' Match: %d' % len(matchs))
         for n, (p1, p2) in enumerate(matchs):
