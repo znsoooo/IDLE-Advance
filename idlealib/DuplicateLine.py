@@ -12,14 +12,17 @@ class DuplicateLines:
         self.text.bind('<Control-D>', self.delete)
 
     def copy(self, evt):
-        if not self.text.tag_ranges('sel'):
-            self.text.tag_add('sel', 'insert linestart', 'insert+1l linestart')
-        self.text.mark_set('insert', 'sel.first')
-        self.text.insert('sel.last', self.text.get('sel.first', 'sel.last'))
+        if self.text.tag_ranges('sel'):
+            self.text.insert('sel.last', self.text.get('sel.first', 'sel.last'))
+        else:
+            self.text.insert('insert+1l linestart', self.text.get('insert linestart', 'insert+1l linestart'))
         return 'break'
 
     def delete(self, evt):
-        if not self.text.tag_ranges('sel'):
-            self.text.tag_add('sel', 'insert linestart', 'insert+1l linestart')
-        self.text.delete('sel.first', 'sel.last')
+        if self.text.tag_ranges('sel'):
+            self.text.delete('sel.first', 'sel.last')
+        else:
+            ins = self.text.index('insert')
+            self.text.delete('insert linestart', 'insert+1l linestart')
+            self.text.mark_set('insert', ins)
         return 'break'
