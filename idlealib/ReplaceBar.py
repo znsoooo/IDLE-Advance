@@ -7,8 +7,6 @@
 # [a-z]+
 
 # TODO 处理好和纵向滚动条的相对位置问题
-# TODO shell中的stdout无法匹配
-# TODO pat == '' 时报错提示
 
 
 if __name__ == '__main__':
