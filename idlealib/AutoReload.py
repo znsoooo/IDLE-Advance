@@ -16,7 +16,7 @@ def mtime(file):
 
 class AutoReload:
     def __init__(self, parent):
-        self.root = parent.root
+        self.text = parent.text
         self.io = parent.io
         self.set_saved = parent.set_saved
 
@@ -35,7 +35,7 @@ class AutoReload:
         mt = mtime(self.io.filename)
         if self.mt != mt:
             self.mt = mt  # 激活窗口最多只提示一次，下一次提示在本地文件再次发生修改
-            if askyesno('Reload', '"%s"\n\nThis script has been modified by another program.\nDo you want to reload it?' % self.io.filename, parent=self.root):
+            if askyesno('Reload', '"%s"\n\nThis script has been modified by another program.\nDo you want to reload it?' % self.io.filename, parent=self.text):
                 self.ReloadFile()
             else:
                 self.set_saved(False) # 设置为未保存状态
