@@ -142,6 +142,20 @@ class ReplaceBar(tk.Frame):
         self.text.after(5, self.Update) # TODO unknown reason
 
     def ReplaceAll(self):
-        # TODO 替换选区部分内容
-        self.replace.replace_all()
+        text = self.text
+        if not text.tag_ranges('sel'):
+            self.replace.replace_all()
+        else:
+            self.engine.wrapvar.set(False)
+            text.undo_block_start()
+
+            tail = text.get('sel.last', 'end-1c')
+            text.delete('sel.last', 'end-1c')
+            text.tag_remove('sel', '1.0', 'end')
+            self.replace.replace_all()
+            text.insert('end-1c', tail) # TODO 撤销/重做时光标会移动到最后
+
+            text.undo_block_stop()
+            self.engine.wrapvar.set(True)
+
         self.text.after(5, self.Update) # TODO unknown reason
