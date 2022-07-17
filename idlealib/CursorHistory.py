@@ -26,16 +26,17 @@ class CursorHistory:
         if cur != self.history[self.pointer]:
             self.pointer += 1
             self.history = self.history[:self.pointer] + [cur]
+        self.text.event_generate('<<set-line-and-column>>') # fix set `Ln/Col` in corner
 
     def Move(self, n):
         if -1 < self.pointer + n < len(self.history):
             self.pointer += n
             self.text.see(self.history[self.pointer])
-            tag = '-1c' if n > 0 else '+1c' # TODO 当用快捷键操作时会多运动一个字符
-            self.text.mark_set('insert', self.history[self.pointer] + tag)
+            self.text.mark_set('insert', self.history[self.pointer])
+        return 'break'
 
     def Binding(self):
         text = self.text
-        text.bind('<ButtonRelease-1>', self.Add) # TODO 会抹掉CodeBrowser.py中的鼠标点击事件（右下角行号不更新）
-        text.bind('<Alt-Left>',  lambda e: self.Move(-1)) # TODO 兼容Alt+上下
+        text.bind('<ButtonRelease-1>', self.Add)
+        text.bind('<Alt-Left>',  lambda e: self.Move(-1))
         text.bind('<Alt-Right>', lambda e: self.Move(1))
