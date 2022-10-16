@@ -6,9 +6,9 @@ if __name__ == '__main__':
     __init__.test_editor(__file__)
 
 
-LEFT = '([{\'"'
+LEFT = '([{\'"`'
 RIGHT = ')]}'
-pair = lambda c: ')]}\'"'['([{\'"'.index(c)]
+pair = lambda c: ')]}\'"`'['([{\'"`'.index(c)]
 
 
 def GetSpan(text):
@@ -34,7 +34,7 @@ class SmartPairing:
 
             if text.tag_ranges('sel'):
                 c1 = text.get('sel.first')
-                if c1 in LEFT and c1 != c and ((c1 in '([{') ^ (c in '\'"')):
+                if c1 in LEFT and c1 != c and ((c1 in '([{') ^ (c in '\'"`')):
                     self.PairDelete()
 
             sel = text.tag_ranges('sel')

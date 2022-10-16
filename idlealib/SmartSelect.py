@@ -85,7 +85,7 @@ def Selecting(e):
             p1, p2 = MatchSpan(r' +', line, col)
             Select(text, 'current linestart+%dc' % p1, 'current linestart+%dc' % p2)
 
-    elif c in '\'"': # quote in comment
+    elif c in '\'"`': # quote in comment
         s = text.get('current+1c', 'end')
         n = s.find(c)
         Select(text, 'current', 'current+%dc' % (n + 2))
@@ -134,7 +134,7 @@ def Selecting(e):
             p1, p2 = m.span()
             text.tag_add('hit', lc(s[:p1]), lc(s[:p2])) # 如果使用`1.0+nc`字符偏移会命中Squeezer导致错位
 
-    else: # charset: !$%&*+,-/;<=>?@^`|~  for test: s.split('\n')[:ln]
+    else: # charset: !$%&*+,-/;<=>?@^|~  for test: s.split('\n')[:ln]
         p1, p2 = MatchSpan(r'[^\w()[\]{}\'" ]+', line, col) # 不"粘"括号空格和引号
         Select(text, 'current linestart+%dc' % p1, 'current linestart+%dc' % p2)
         # Select(text, 'current', 'current+1c')
