@@ -16,4 +16,8 @@ class TimeTag:
         parent.text.bind('<F4>', self.Insert)
 
     def Insert(self, evt):
-        self.text.insert('insert', time.strftime('# %Y-%m-%d %H:%M:%S'))
+        tag = time.strftime(' # %Y-%m-%d %H:%M:%S')
+        header = self.text.get('insert linestart', 'insert')
+        if not header.strip():
+            tag = tag[1:] + '\n' + header
+        self.text.insert('insert', tag)
