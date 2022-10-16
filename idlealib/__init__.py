@@ -222,10 +222,10 @@ class MyEditorWindow(EditorWindow):
             if ext == '.py' and name not in ('__init__', '__main__'):
                 try:
                     self.load_extension(name) # TODO 支持任意位置文件导入
-                except:
-                    print('Failed to import IDLE-Adv extension: %s' % name)
-                    import traceback
-                    traceback.print_exc()
+                except Exception as e:
+                    print("Fail to load extension 'idlealib.%s':\n  %s" % (name, e), file=sys.stderr)
+                    # import traceback
+                    # traceback.print_exc()
 
         menu = self.menudict['advance']
         if menu.type('end') == 'separator':
