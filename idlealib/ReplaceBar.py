@@ -14,6 +14,7 @@ if __name__ == '__main__':
     __init__.test_editor(__file__)
 
 
+import re
 import tkinter as tk
 
 import sys
@@ -124,7 +125,7 @@ class ReplaceBar(tk.Frame):
 
         s = self.text.get('1.0', 'end-1c')
         insert = len(self.text.get('1.0', 'insert'))
-        matchs = [m.span() for m in prog.finditer(s)]
+        matchs = [m.span() for m in re.finditer(prog.pattern, s, prog.flags | re.M)] # fix matches the end of lines
         self.tip.config(text=' Match: %d' % len(matchs))
         for n, (p1, p2) in enumerate(matchs):
             if p1 <= insert < p2:
