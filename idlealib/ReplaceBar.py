@@ -44,6 +44,7 @@ class ReplaceBar(tk.Frame):
 
         self.engine = engine = searchengine.get(self.root)
         self.replace = replace = ReplaceDialog(self.root, engine)
+        self.show = False
 
         # hot fix for `dialog.open(text)` effect called in `idlelib.replace.replace`
         replace.text = self.text
@@ -81,6 +82,7 @@ class ReplaceBar(tk.Frame):
 
         self.text.bind("<<replace>>", self.OnReplace)
 
+        t1.bind('<FocusIn>', self.Update)
         self.text.bind('<Key-Escape>', self.Hide)
         t1.bind('<Escape>', self.Hide)
         t2.bind('<Escape>', self.Hide)
@@ -101,6 +103,8 @@ class ReplaceBar(tk.Frame):
         bar.t1.focus()
         bar.t1.select_range(0, 'end')  # don't use `t1.select_to('end')`. 选中区域为空时，输入字符后无法删除（移动光标后可以删除）
         bar.t1.icursor('end')
+        bar.show = True
+        bar.Update()
 
     def Hide(self, evt):
         if PY37:
@@ -109,8 +113,12 @@ class ReplaceBar(tk.Frame):
             self.forget()
         self.text.tag_remove('hit', '1.0', 'end')
         self.text.focus()
+        self.show = False
 
     def Update(self, *args):
+        if not self.show:
+            return
+
         self.text.tag_remove('hit', '1.0', 'end')
         self.tip.config(text=' Match: 0')
 
@@ -127,10 +135,11 @@ class ReplaceBar(tk.Frame):
         insert = len(self.text.get('1.0', 'insert'))
         matchs = [m.span() for m in re.finditer(prog.pattern, s, prog.flags | re.M)] # fix matches the end of lines
         self.tip.config(text=' Match: %d' % len(matchs))
-        for n, (p1, p2) in enumerate(matchs):
-            if p1 <= insert < p2:
-                self.tip.config(text=' Match: %d/%d' % (n + 1, len(matchs)))
-            self.text.tag_add('hit', lc(s[:p1]), lc(s[:p2])) # 如果使用`1.0+nc`字符偏移会命中Squeezer导致错位
+        if len(matchs) < 1000:
+            for n, (p1, p2) in enumerate(matchs):
+                if p1 <= insert < p2:
+                    self.tip.config(text=' Match: %d/%d' % (n + 1, len(matchs)))
+                self.text.tag_add('hit', lc(s[:p1]), lc(s[:p2])) # 如果使用`1.0+nc`字符偏移会命中Squeezer导致错位
 
     def Find(self, forward):
         self.engine.wrapvar.set(True)
