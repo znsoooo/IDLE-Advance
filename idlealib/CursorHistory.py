@@ -26,7 +26,6 @@ class CursorHistory:
         if cur != self.history[self.pointer]:
             self.pointer += 1
             self.history = self.history[:self.pointer] + [cur]
-        self.text.event_generate('<<set-line-and-column>>') # fix set `Ln/Col` in corner
 
     def Move(self, n):
         if -1 < self.pointer + n < len(self.history):
@@ -37,6 +36,6 @@ class CursorHistory:
 
     def Binding(self):
         text = self.text
-        text.bind('<ButtonRelease-1>', self.Add)
+        text.bind('<ButtonRelease-1>', self.Add, add=True)
         text.bind('<Alt-Left>',  lambda e: self.Move(-1))
         text.bind('<Alt-Right>', lambda e: self.Move(1))

@@ -198,6 +198,7 @@ class MyEditorWindow(EditorWindow):
 
         self.recent_files_menu['postcommand'] = self.update_recent_files_list  # fix list not refresh when open another IDLE.
 
+        self.text.bind('<ButtonRelease-1>', lambda e: self.text.event_generate('<<set-line-and-column>>')) # fix event can't multi-binding to `ButtonRelease-1`
         self.load_adv_extensions()
         self.text.bind('<F12>', self.test)
 

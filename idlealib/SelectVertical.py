@@ -32,7 +32,7 @@ class SelectVertical:
         self.enable = False
 
         self.text.bind('<Button-1>',        self.down)
-        self.text.bind('<ButtonRelease-1>', self.up)
+        self.text.bind('<ButtonRelease-1>', self.up, add=True)
         self.text.bind('<B1-Motion>',       self.move)
 
         # self.text.bind('<KeyPress-Alt_L>',   self.setup)
