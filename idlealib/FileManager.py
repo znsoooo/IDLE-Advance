@@ -34,7 +34,7 @@ class FileManager(tk.Menu):
         self.add_command(label='Insert Dirname',  command=lambda: insert("r'%s'" % dirname(path())))
         self.add_separator()
         self.add_command(label='Open in Explorer', command=lambda: subprocess.Popen('explorer /select, "%s"' % path().replace('/', '\\')))
-        self.add_command(label='Open in CMD',      command=self.OpenCmd)
+        self.add_command(label='Open in CMD',      command=lambda: subprocess.Popen('cmd /s /k pushd "%s"' % dirname(path())))
         # self.add_command(label='Run in CMD',       command=lambda: os.system('start "%s"'%io.filename)) # TODO
         self.add_separator()
         self.add_command(label='Rename File', command=self.Rename)
@@ -43,13 +43,6 @@ class FileManager(tk.Menu):
         self.text.bind('<F2>', self.Rename)
 
         parent.amenu.insert_cascade(3, label='File Manager', menu=self)
-
-    def OpenCmd(self):
-        cwd = os.getcwd()
-        if self.io.filename:
-            os.chdir(dirname(self.io.filename))
-        os.system('start')
-        os.chdir(cwd)
 
     def Rename(self):
         basename2 = basename(self.io.filename)
