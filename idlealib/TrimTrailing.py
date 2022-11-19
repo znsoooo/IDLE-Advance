@@ -14,17 +14,25 @@ class TrimTrailing:
         self.text = parent.text
         parent.before_save.append(self.callback)
 
+    def get_line(self, index):
+        return int(self.text.index(index).split('.')[0])
+
     def callback(self):
         text = self.text
-        index = text.index('insert')
-        s1 = text.get('1.0', 'end-1c')
-        s2 = s1.replace('\r\n', '\n').replace('\r', '\n')
-        s2 = re.sub(' +$', '', s2, flags=re.M)
 
-        if s1 != s2:
-            text.undo_block_start()
-            text.delete('1.0', 'end-1c')
-            text.insert('1.0', s2)
-            text.mark_set('insert', index)
-            text.see('insert linestart')
-            text.undo_block_stop()
+        ln_end = self.get_line('end-1c')
+        ln_ins = self.get_line('insert')
+        if text.tag_ranges('sel'):
+            ln_ins = -1
+
+        text.undo_block_start()
+
+        for ln in range(1, ln_end + 1):
+            # skip current line or in selection mode
+            if ln != ln_ins:
+                s = text.get('%d.0' % ln, '%d.end' % ln)
+                m = re.search(' +$', s)
+                if m:
+                    text.delete('%d.%d' % (ln, m.start()), '%d.end' % ln)
+
+        text.undo_block_stop()
