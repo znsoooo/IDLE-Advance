@@ -9,8 +9,8 @@ if __name__ == '__main__':
 class ShiftLines:
     def __init__(self, parent):
         self.text = parent.text
-        self.text.bind('<Alt-Control-Up>', self.callback)
-        self.text.bind('<Alt-Control-Down>', self.callback)
+        self.text.bind('<Alt-Up>', self.callback)
+        self.text.bind('<Alt-Down>', self.callback)
 
     def callback(self, evt):
         text = self.text
