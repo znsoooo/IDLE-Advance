@@ -96,7 +96,10 @@ def Selecting(e):
         if 'COMMENT' in text.tag_names('current') and \
            text.index('current') == text.tag_prevrange('COMMENT', 'current+1c')[0]:
             p1, p2 = MatchSpan(r' *#', line, col)
-            Select(text, 'current linestart+%dc' % p1, 'current lineend')
+            if p1 > 0:
+                Select(text, 'current linestart+%dc' % p1, 'current lineend')
+            else:
+                Select(text, 'current linestart', 'current linestart+1l')
         else:
             Select(text, 'current', 'current+1c')
 
