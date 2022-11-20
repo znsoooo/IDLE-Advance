@@ -92,6 +92,9 @@ class ReplaceBar(tk.Frame):
         return 'break'
 
     def Open(self, text, string=None):
+        # remove selection to avoid replacing only itself in `replace_all` function
+        text.tag_remove('sel', '1.0', 'end-1c')
+
         bar = text.replace_bar
         if PY37:
             bar.grid(row=3, column=1, sticky='nsew')
