@@ -31,6 +31,7 @@ else:
 
 
 jn = lambda x,y: '%i.%i'%(x,y) # Good!
+sp = lambda c: eval(c.replace('.',',')) # Good!
 lc = lambda s: jn(s.count('\n')+1, len(s)-s.rfind('\n')-1) # Good!
 
 
@@ -155,20 +156,43 @@ class ReplaceBar(tk.Frame):
         self.text.after(5, self.Update) # TODO unknown reason
 
     def ReplaceAll(self):
+        # Ref: idlelib.replace.replace_all
         text = self.text
-        if not text.tag_ranges('sel'):
-            self.replace.replace_all()
-        else:
-            self.engine.wrapvar.set(False)
-            text.undo_block_start()
 
-            tail = text.get('sel.last', 'end-1c')
-            text.delete('sel.last', 'end-1c')
-            text.tag_remove('sel', '1.0', 'end')
-            self.replace.replace_all()
-            text.insert('end-1c', tail) # TODO 撤销/重做时光标会移动到最后
+        prog = self.engine.getprog()
+        if not prog: return
 
-            text.undo_block_stop()
-            self.engine.wrapvar.set(True)
+        res = self.engine.search_text(text, prog)
+        if not res: return
+
+        text.undo_block_start()
+
+        line, col = sp(text.index('sel.first') or '1.0')
+        line3, col3 = sp(text.index('sel.last') or text.index('end-1c'))
+        text.tag_remove('sel', '1.0', 'end')
+        text.tag_remove('hit', '1.0', 'end')
+
+        repl = self.replace.replvar.get()
+        while 1:
+            res = self.engine.search_forward(text, prog, line, col, 0)
+            if not res: break
+
+            line, m = res
+            new = self.replace._replace_expand(m, repl)
+            if new is None: break
+
+            col1, col2 = m.span()
+            col = col1 + len(new)
+            if (line, col2) > (line3, col3):
+                break
+            if line == line3:
+                col3 += col - col2
+
+            first = jn(line, col1)
+            last  = jn(line, col2)
+            text.delete(first, last)
+            text.insert(first, new)
+
+        text.undo_block_stop()
 
         self.text.after(5, self.Update) # TODO unknown reason
