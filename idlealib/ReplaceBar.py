@@ -167,6 +167,7 @@ class ReplaceBar(tk.Frame):
 
         text.undo_block_start()
 
+        sel_first = text.index('sel.first')
         line, col = sp(text.index('sel.first') or '1.0')
         line3, col3 = sp(text.index('sel.last') or text.index('end-1c'))
         text.tag_remove('sel', '1.0', 'end')
@@ -192,6 +193,9 @@ class ReplaceBar(tk.Frame):
             last  = jn(line, col2)
             text.delete(first, last)
             text.insert(first, new)
+
+        if sel_first:
+            text.tag_add('sel', sel_first, jn(line3, col3))
 
         text.undo_block_stop()
 
