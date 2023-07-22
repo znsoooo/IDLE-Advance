@@ -22,14 +22,13 @@ class AutoComment:
         lines.pop()
 
         prefix = os.path.commonprefix(lines)
-        m = re.match(r'(\s*)(##|# |#)?', prefix)
+        m = re.match(r'(\s*)(#?)', prefix)
         header, comment = m.groups()
+        length = len(header)
         if comment:
-            start = len(header + comment)
+            lines = [header + re.sub(r'^(##|# |#)', '', line[length:]) for line in lines]
         else:
-            start = len(header)
-            header += '# '
-        lines = [header + line[start:] for line in lines]
+            lines = [header + '# ' + line[length:] for line in lines]
 
         self.set_region(head, tail, chars, lines + [''])
         return 'break'
