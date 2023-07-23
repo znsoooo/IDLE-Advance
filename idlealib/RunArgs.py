@@ -18,17 +18,23 @@ class RunArgs:
         self.root = parent.root
         self.flist = parent.flist
 
+        self.args = None
+
         parent.add_adv_menu('Run with args', self.Run, sp=True)
+
+    def AppendArgs(self, interp):
+        if self.args is not None:
+            code = "__import__('sys').argv.extend(%r.split())" % self.args
+            interp.runcommand(code)
+            self.args = None
 
     def Run(self):
         args = askstring('Run with args', 'args:', parent=self.root)
         if args is not None:
-            cmd = "__import__('sys').argv.extend(%r.split())" % args
+            self.args = args
             shell = self.flist.open_shell()
-            interp = shell.interp
-            interp.runcommand(cmd)
-            interp._runcode = interp.runcode
-            interp.runcode = lambda evt: [interp.runcommand(cmd), interp._runcode(evt)]
+            _runcode = shell.interp.runcode
+            shell.interp.runcode = lambda code: [self.AppendArgs(shell.interp), _runcode(code)]
             self.text.event_generate('<<run-module>>')
 
 
