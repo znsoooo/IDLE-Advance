@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 import setuptools
 
@@ -40,7 +41,13 @@ setuptools.setup(
     # install_requires=['windnd'], # for drag-open file feature
     # extras_requires={'windnd': ['windnd']},
     license='MIT License',
-    entry_points={'console_scripts': ['idlea=idlealib:run']},
+    entry_points={
+        'console_scripts': [
+            'idlea=idlealib:run',
+            'idlea%d%d=idlealib:run' % sys.version_info[:2],
+            'idlea%d%d%d=idlealib:run' % (sys.version_info[:2] + (sys.maxsize.bit_length() + 1,)),
+        ]
+    },
     package_data={'': ['*.*']},
     keywords='IDLE-Advance IDLE IDLEA IDLEX extension idlelib idlexlib idlealib',
 )
