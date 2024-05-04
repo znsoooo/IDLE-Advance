@@ -1,7 +1,11 @@
-:: auto get current version and upload to pypi
+@echo off
 
-for /f %%a in (VERSION.txt) do (set ver=%%a)
-echo %ver%
+for /f %%i in (VERSION.txt) do (set ver=%%i)
+echo Version:
+echo   %ver%
+echo.
 
 python -m twine upload dist/idlea-%ver%.tar.gz
+echo.
+
 pause
