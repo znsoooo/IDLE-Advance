@@ -1,20 +1,27 @@
 """添加和取消注释"""
 
 
-import os
-import re
-
-
 if __name__ == '__main__':
     import __init__
     __init__.test_editor(__file__)
 
 
+import os
+import re
+import sys
+
+
 class AutoComment:
     def __init__(self, parent):
         self.text = parent.text
-        self.get_region = parent.get_region
-        self.set_region = parent.set_region
+
+        if sys.version_info < (3, 7):
+            self.get_region = parent.get_region
+            self.set_region = parent.set_region
+        else:
+            self.get_region = parent.fregion.get_region
+            self.set_region = parent.fregion.set_region
+
         self.text.bind('<Control-/>', self.callback)
 
     def callback(self, evt):

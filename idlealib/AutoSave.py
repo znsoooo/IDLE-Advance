@@ -7,6 +7,7 @@ if __name__ == '__main__':
 
 
 import os
+import sys
 
 TICK = 7000
 
@@ -21,7 +22,7 @@ class AutoSave:
         self.io = parent.io
         self.get_saved = parent.get_saved # function
 
-        self.fixfixlastline()
+        self.HotFix()
 
         self.root.after(TICK, self.Backup)
 
@@ -29,13 +30,17 @@ class AutoSave:
         parent.after_save.append(self.AfterSave)
         parent.before_close.append(self.BeforeClose)
 
-    def fixfixlastline(self): # append '\n' at last line **after** cursor
-        def fixlastline2():
+    def HotFix(self): # append '\n' at last line **after** cursor
+        def new_api():
             self.text.mark_gravity('insert', 'left')
-            fixlastline()
+            ret = old_api()
             self.text.mark_gravity('insert', 'right')
-        fixlastline = self.io.fixlastline
-        self.io.fixlastline = fixlastline2
+            return ret
+
+        if sys.version_info < (3, 7):
+            old_api, self.io.fixlastline = self.io.fixlastline, new_api
+        else:
+            old_api, self.io.fixnewlines = self.io.fixnewlines, new_api
 
     def Backup(self, loop=True):
         filename = self.io.filename
