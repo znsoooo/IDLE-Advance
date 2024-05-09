@@ -5,11 +5,13 @@ if __name__ == '__main__':
     import __init__
     __init__.test_editor(__file__)
 
-
 import tkinter as tk
-from PIL import ImageTk
-
-import qrcode
+try:
+    import qrcode
+    from PIL import ImageTk
+except ImportError as e:
+    print('%s: %s' % (__name__, e))
+    qrcode = None
 
 # TODO 过长文本保护（Unicode长度）/翻页显示
 # TODO 调整弹出位置
@@ -43,6 +45,9 @@ class ViewWindow(tk.Toplevel):
 
 class ShareQRCode:
     def __init__(self, parent):
+        if qrcode is None:
+            return
+
         self.text = parent.text
         self.top = parent.top
 

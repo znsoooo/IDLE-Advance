@@ -12,8 +12,8 @@ class DragOpen:
         try:
             import windnd
             windnd.hook_dropfiles(parent.text, func=self.DragOpen)
-        except Exception as e:
-            print('import windnd error:', e)
+        except ImportError as e:
+            print('%s: %s' % (__name__, e))
 
     def DragOpen(self, files): # TODO 恢复记忆位置
         for file_b in files:
