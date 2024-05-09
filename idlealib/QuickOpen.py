@@ -19,8 +19,6 @@ class QuickOpen:
         # parent.add_adv_menu('Quick Open', self.Open)
         parent.add_adv_menu('Quick Start', self.Start)
 
-        print(os.getcwd())
-
     # def Open(self):
     #     if not self.text.tag_ranges('sel'):
     #         return
@@ -34,11 +32,11 @@ class QuickOpen:
         os.popen('start ' + s)
 
 
-'F:\lsx\coding\idle\idlealib\scripts'
-'scripts\readme.md'
-"F:\lsx\代码说明.docx"
-"notepad 1.txt"
-"C:\\"
-"cmd /k ipconfig"
-
-# todo 相对文件夹打不开
+TEST = r"""
+    C:\Windows\System32\calc.exe
+    C:\Windows\System32\
+    .\docs\LICENSE.txt
+    .\docs\
+    notepad new.txt
+    cmd /k ipconfig
+"""
