@@ -21,8 +21,9 @@ versions = (major, minor, bits)
 exe = sys.executable
 src = os.path.abspath(__file__ + '/../__main__.py')
 
-# Select 2 classes of file's type
+# Classes in regedit
 classes = ['Python.File', 'Python.NoConFile']
+classes_root = r'HKEY_CURRENT_USER\Software\Classes'  # `HKEY_CLASSES_ROOT` may not have permission
 
 
 def SetRegValue(key, name='', value=''):
@@ -37,21 +38,26 @@ def DeleteReg(key, name=''):
     import winreg
     if isinstance(key, str):
         root, key = key.split('\\', 1)
-        key = winreg.OpenKey(getattr(winreg, root), key, 0, winreg.KEY_ALL_ACCESS)
+        try:
+            key = winreg.OpenKey(getattr(winreg, root), key, 0, winreg.KEY_ALL_ACCESS)
+        except FileNotFoundError:
+            return
     if name:
         winreg.DeleteValue(key, name)
     else:
         for i in range(winreg.QueryInfoKey(key)[0]):
-            name = winreg.EnumKey(key, i)
+            name = winreg.EnumKey(key, 0)
             DeleteReg(winreg.OpenKey(key, name))
         winreg.DeleteKey(key, '')
 
 
 def AddWindowsMenu():
-    SetRegValue(r'HKEY_CURRENT_USER\Software\Classes\.py\ShellNew', 'FileName')
+    SetRegValue(classes_root + r'\.py\ShellNew', 'FileName')
+    SetRegValue(classes_root + r'\.py', '', 'Python.File')
+    SetRegValue(classes_root + r'\.pyw', '', 'Python.NoConFile')
 
     for cls in classes:
-        root = r'HKEY_CURRENT_USER\Software\Classes\%s\Shell\editwithidleadv' % cls
+        root = r'%s\%s\Shell\editwithidleadv' % (classes_root, cls)
         SetRegValue(root, 'MUIVerb', '&Edit with IDLE-Adv')
         SetRegValue(root, 'Subcommands')
         SetRegValue(root + r'\shell\edit%d%d-%d' % versions, 'MUIVerb', 'Edit with IDLE-Adv %d.%d (%d-bit)' % versions)
@@ -60,13 +66,14 @@ def AddWindowsMenu():
 
 def DeleteWindowsMenu():
     for cls in classes:
-        root = r'HKEY_CURRENT_USER\Software\Classes\%s\Shell\editwithidleadv' % cls
+        root = r'%s\%s\Shell\editwithidleadv' % (classes_root, cls)
         DeleteReg(root + r'\shell\edit%d%d-%d' % versions)
 
 
 def DeleteWindowsMenuAll():
     for cls in classes:
-        DeleteReg(r'HKEY_CURRENT_USER\Software\Classes\%s\Shell\editwithidleadv' % cls)
+        DeleteReg(r'%s\%s\Shell\editwithidleadv' % (classes_root, cls))
+        DeleteReg(r'%s\%s\Shell\Edit with IDLE-Adv' % (classes_root, cls))  # old entry
 
 
 class ContextManager(tk.Menu):
