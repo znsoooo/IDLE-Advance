@@ -220,7 +220,7 @@ class MyEditorWindow(EditorWindow):
     def load_adv_extensions(self):
         for file in EXTENSIONS:
             name, ext = os.path.splitext(os.path.basename(file))
-            if ext == '.py' and name not in ('__init__', '__main__'):
+            if name[:2] != '__' and ext.lower() == '.py':
                 try:
                     self.load_extension(name) # TODO 支持任意位置文件导入
                 except Exception as e:
