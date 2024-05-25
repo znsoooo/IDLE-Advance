@@ -3,9 +3,9 @@
 ## About
 - __Platform:__ >= Windows or Linux/macOS (untested)
 - __Python:__ >= Python 3.4
-- __Author:__ Lishixian (znsoooo)
+- __Author:__ Shixian Li (znsoooo)
 - __Github:__ https://github.com/znsoooo/IDLE-Advance
-- __License:__ MIT License. Copyright (c) 2022 Lishixian (znsoooo). All Rights Reserved.
+- __License:__ MIT License. Copyright (c) 2021-2024 Shixian Li (znsoooo). All rights reserved.
 
 
 ## What is it?
@@ -91,7 +91,7 @@ and set `value` as:
 
 
 # IDLE增强计划（Advance）
-- __Author:__ Lishixian
+- __Author:__ Shixian Li
 - __QQ:__ 11313213
 - __Email:__ lsx7@sina.com
 - __Website:__ https://github.com/znsoooo/IDLE-Advance

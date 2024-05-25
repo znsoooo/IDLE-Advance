@@ -1,4 +1,4 @@
-"""IDLE-Advance: IDLE Useful Extensions
+"""IDLE Advance Extensions
 
 运行__main__.py获得一个加载所有插件的IDLE-Advance的示例文件。
 运行__init__.py获得一个打开自身脚本并加载所有插件的editor的例子。
@@ -7,7 +7,7 @@
 
 See also: https://github.com/znsoooo/IDLE-Advance
 
-MIT license. Copyright (c) 2021-2022 Lishixian (znsoooo). All Rights Reserved.
+MIT license. Copyright (c) 2021-2024 Shixian Li (znsoooo). All Rights Reserved.
 
 """
 
@@ -19,10 +19,10 @@ PY36 = sys.version_info > (3, 6)
 # `abspath` for open in cmd like `python __init__.py` to open script.
 EXTENSIONS = os.listdir(os.path.dirname(os.path.abspath(__file__)))
 
-__author__  = 'Lishixian <lsx7@sina.com>'
+__author__  = 'Shixian Li <lsx7@sina.com>'
 __credits__ = 'See at: https://github.com/znsoooo/IDLE-Advance'
-__date__    = '2022'
-__version__ = '1.2'
+__date__    = '20240525'
+__version__ = '1.2.9'
 
 __all__ = ['run', 'test_editor', 'test_shell', 'PY36']
 

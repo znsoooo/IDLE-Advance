@@ -18,7 +18,7 @@ with open('README.md', encoding='u8') as f:
 setuptools.setup(
     name='idlea',
     version=version,
-    author='Lishixian(znsoooo)',
+    author='Shixian Li (znsoooo)',
     author_email='lsx7@sina.com',
     description='IDLE-Advance',
     long_description=long_description,
