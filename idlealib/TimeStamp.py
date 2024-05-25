@@ -17,6 +17,9 @@ class TimeStamp:
         parent.text.bind('<F4>', self.Insert)
 
     def Insert(self, evt):
+        if evt.state != 8:  # if not press any modifier keys
+            return
+
         line = self.text.get('insert linestart', 'insert lineend')
         indent = re.match(r'^\s*', line).group()
 
