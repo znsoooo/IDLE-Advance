@@ -8,7 +8,10 @@ if __name__ == '__main__':
 
 import os
 import sys
+import traceback
+
 import tkinter as tk
+from tkinter.messagebox import showinfo, showwarning
 
 
 # Get Python versions
@@ -76,13 +79,23 @@ def DeleteWindowsMenuAll():
         DeleteReg(r'%s\%s\Shell\Edit with IDLE-Adv' % (classes_root, cls))  # old entry
 
 
+def wrap(func, parent):
+    def wrapper():
+        try:
+            func()
+            showinfo('Info', 'Success!', parent=parent)
+        except Exception:
+            showwarning('Warning', traceback.format_exc(-1), parent=parent)
+    return wrapper
+
+
 class ContextManager(tk.Menu):
     def __init__(self, parent):
         if sys.platform == 'win32':
             tk.Menu.__init__(self, parent.menubar, tearoff=0)
 
-            self.add_command(label='Add Context Menu', command=AddWindowsMenu)
-            self.add_command(label='Remove Context Menu', command=DeleteWindowsMenu)
-            self.add_command(label='Remove All Context Menu', command=DeleteWindowsMenuAll)
+            self.add_command(label='Add Context Menu', command=wrap(AddWindowsMenu, parent.text))
+            self.add_command(label='Remove Context Menu', command=wrap(DeleteWindowsMenu, parent.text))
+            self.add_command(label='Remove All Context Menu', command=wrap(DeleteWindowsMenuAll, parent.text))
 
             parent.amenu.insert_cascade(0, label='Context Manager', menu=self)
