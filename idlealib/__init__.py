@@ -21,8 +21,8 @@ EXTENSIONS = os.listdir(os.path.dirname(os.path.abspath(__file__)))
 
 __author__  = 'Shixian Li <lsx7@sina.com>'
 __credits__ = 'See at: https://github.com/znsoooo/IDLE-Advance'
-__date__    = '20240525'
-__version__ = '1.2.9'
+__date__    = '20240622'
+__version__ = '1.2.10'
 
 __all__ = ['run', 'test_editor', 'test_shell', 'PY36']
 
