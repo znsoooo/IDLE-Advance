@@ -28,32 +28,34 @@ class AutoComment:
 
     def auto_comment_region_event(self, evt):
         head, tail, chars, lines = self.get_region()
-        lines.pop()
 
-        prefix = os.path.commonprefix(lines)
+        prefix = os.path.commonprefix([line for line in lines[:-1] if line.strip()])
         m = re.match(r'(\s*)(#?)', prefix)
-        header, comment = m.groups()
-        length = len(header)
-        if comment:
-            lines = [header + re.sub(r'^(##|# |#)', '', line[length:]) for line in lines]
-        else:
-            lines = [header + '# ' + line[length:] for line in lines]
+        indent, found_comment = m.groups()
+        col = len(indent)
 
-        self.set_region(head, tail, chars, lines + [''])
+        for row in range(len(lines) - 1):
+            if found_comment:
+                lines[row] = indent + re.sub(r'^(##|# |#)', '', lines[row][col:])
+                lines[row] = lines[row].strip() and lines[row]
+            else:
+                lines[row] = indent + '# ' + lines[row][col:]
+
+        self.set_region(head, tail, chars, lines)
         return 'break'
 
     def comment_region_event(self, evt):
         head, tail, chars, lines = self.get_region()
-        for pos in range(len(lines) - 1):
-            indent, code = re.findall(r'(\s*)(.*)', lines[pos])[0]
-            lines[pos] = indent + '# ' + code if code else indent + code
+        for row in range(len(lines) - 1):
+            indent, code = re.findall(r'(\s*)(.*)', lines[row])[0]
+            lines[row] = indent + '# ' + code if code else indent + code
         self.set_region(head, tail, chars, lines)
         return 'break'
 
     def uncomment_region_event(self, evt):
         head, tail, chars, lines = self.get_region()
-        for pos in range(len(lines)):
-            indent, comment, code = re.findall(r'(\s*)(##|# |#)?(.*)', lines[pos])[0]
-            lines[pos] = indent + code
+        for row in range(len(lines)):
+            indent, comment, code = re.findall(r'(\s*)(##|# |#)?(.*)', lines[row])[0]
+            lines[row] = indent + code
         self.set_region(head, tail, chars, lines)
         return 'break'
