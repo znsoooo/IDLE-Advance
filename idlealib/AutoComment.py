@@ -22,9 +22,11 @@ class AutoComment:
             self.get_region = parent.fregion.get_region
             self.set_region = parent.fregion.set_region
 
-        self.text.bind('<Control-/>', self.callback)
+        self.text.bind('<Control-/>', self.auto_comment_region_event)
+        self.text.bind('<<comment-region>>', self.comment_region_event)
+        self.text.bind('<<uncomment-region>>', self.uncomment_region_event)
 
-    def callback(self, evt):
+    def auto_comment_region_event(self, evt):
         head, tail, chars, lines = self.get_region()
         lines.pop()
 
@@ -38,4 +40,20 @@ class AutoComment:
             lines = [header + '# ' + line[length:] for line in lines]
 
         self.set_region(head, tail, chars, lines + [''])
+        return 'break'
+
+    def comment_region_event(self, evt):
+        head, tail, chars, lines = self.get_region()
+        for pos in range(len(lines) - 1):
+            indent, code = re.findall(r'(\s*)(.*)', lines[pos])[0]
+            lines[pos] = indent + '# ' + code if code else indent + code
+        self.set_region(head, tail, chars, lines)
+        return 'break'
+
+    def uncomment_region_event(self, evt):
+        head, tail, chars, lines = self.get_region()
+        for pos in range(len(lines)):
+            indent, comment, code = re.findall(r'(\s*)(##|# |#)?(.*)', lines[pos])[0]
+            lines[pos] = indent + code
+        self.set_region(head, tail, chars, lines)
         return 'break'
