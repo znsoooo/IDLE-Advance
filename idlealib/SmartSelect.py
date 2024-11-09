@@ -10,7 +10,7 @@ import re
 
 sp = lambda c: eval(c.replace('.',',')) # Good!
 jn = lambda x,y: '%i.%i'%(x,y) # Good!
-lc = lambda s: jn(s.count('\n')+1, len(s)-s.rfind('\n')-1) # Good!
+lc = lambda s: jn(s.count('\n')+1,len(s)-s.rfind('\n')-1) # Good!
 
 is_code = lambda s: s.split('#')[0].strip()
 
@@ -41,15 +41,24 @@ def MatchSpan(r, s, n):
             return m.span()
 
 
-def LineType(line):
-    indent = re.match(r' *', line).end()
-    code = line[indent:]
-    if code.startswith('#'):
-        return indent, 'comment'
-    elif code:
-        return indent, 'code'
-    else:
-        return indent, 'empty'
+def SelectBlock(text, first_line=True):
+    patt = re.compile(r'([ \t]*)(.*?)([ \t]*)(#.*)?')
+
+    idx1 = 'current linestart' if first_line else 'current linestart-1l'
+    lines = text.get(idx1, 'end').split('\n')
+    base_indent = patt.fullmatch(lines[0]).group(1)
+
+    ln = -1
+    for i, line in enumerate(lines[1:]):
+        indent, code, space, comment = patt.fullmatch(line).groups()
+        if code or comment:
+            if indent > base_indent:
+                ln = i
+            else:
+                break
+
+    ln = ln + 2 if first_line else ln + 1
+    Select(text, 'current linestart', 'current linestart+%dl' % ln)
 
 
 def Selecting(e):
@@ -72,31 +81,19 @@ def Selecting(e):
         if is_code(line[col+1:]):
             Select(text, 'current', 'current+1c')
         else:
-            indent = re.match(r' *', line).end()
-            ss = text.get('current linestart+1l', 'end').split('\n')
-            n = 1
-            for r, row in enumerate(ss):
-                indent2, typ = LineType(row)
-                if typ == 'code' and indent2 <= indent:
-                    break
-                if typ != 'empty' and indent2 > indent:
-                    n = r + 2
-            Select(text, 'current linestart', 'current linestart+%dl' % n)
+            SelectBlock(text)
 
     elif c == ' ':
         indent = re.match(r' *', line).end()
         if col < indent:
-            ss = text.get('current linestart+1l', 'end').split('\n')
-            for n1, row in enumerate(ss):
-                indent2, typ = LineType(row)
-                if typ == 'empty':
-                    break
-            ss = text.get('1.0', 'current linestart-1c').split('\n')
-            for n0, row in enumerate(reversed(ss)):
-                indent2, typ = LineType(row)
-                if typ == 'empty':
-                    break
-            Select(text, 'current linestart-%dl' % n0, 'current linestart+%dl' % (n1 + 1))
+            prev_line = text.get('current-1l linestart', 'current-1l lineend')
+            patt = r'.*:[ \t]*(#.*)?'  # line end with ':'
+            if re.fullmatch(patt, prev_line):
+                SelectBlock(text, False)
+            elif re.fullmatch(patt, line):
+                SelectBlock(text)
+            else:
+                Select(text, 'current linestart', 'current linestart+1l')
         else:
             p1, p2 = MatchSpan(r' +', line, col)
             Select(text, 'current linestart+%dc' % p1, 'current linestart+%dc' % p2)
