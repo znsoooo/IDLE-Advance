@@ -13,6 +13,8 @@ jn = lambda x,y: '%i.%i'%(x,y) # Good!
 lc = lambda s: jn(s.count('\n')+1,len(s)-s.rfind('\n')-1) # Good!
 
 is_code = lambda s: s.split('#')[0].strip()
+is_blank = lambda s: not s.strip()
+get_indent = lambda s: re.match(r' *', s.rstrip()).end()
 
 
 def FixTextSelect(root):
@@ -73,7 +75,7 @@ def SelectBlock(text, first_line=True):
             else:
                 break
 
-    ln = ln + 2 if first_line else ln + 1
+    ln = max(1, ln + 2 if first_line else ln + 1)  # at least select one line
     text_sel = TextSelector(text)
     text_sel.select_lines(ln)
 
@@ -101,14 +103,23 @@ def Selecting(e):
         else:
             SelectBlock(text)
 
-    elif c == ' ':
-        indent = re.match(r' *', line).end()
-        if col < indent:
+    elif c == ' ' or c == '\n' and col == 0:
+        indent = get_indent(line)
+        if col <= indent:
+
+            # | prev line   | current line | action           |
+            # | ----------- | ------------ | ---------------- |
+            # | blank       | blank        | select line      |
+            # | blank       | indent       | select block     |
+            # | indent      | blank        | select sub block |
+            # | indent      | same indent  | select block     |
+            # | less indent | more indent  | select sub block |
+            # | more indent | less indent  | select block     |
+
             prev_line = text.get('current-1l linestart', 'current-1l lineend')
-            patt = r'.*:[ \t]*(#.*)?'  # line end with ':'
-            if re.fullmatch(patt, prev_line):
+            if not is_blank(prev_line) and (get_indent(prev_line) < indent or is_blank(line)):
                 SelectBlock(text, False)
-            elif re.fullmatch(patt, line):
+            elif not is_blank(line):
                 SelectBlock(text)
             else:
                 text_sel.select_lines()
