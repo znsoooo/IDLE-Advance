@@ -18,8 +18,8 @@ class DragOpen:
     def DragOpen(self, files): # TODO 恢复记忆位置
         for file_b in files:
             file = file_b.decode('gbk')
-            if file.endswith('.py'): # TODO 非py文件是否打开
-                edit = self.flist.open(file)
+            edit = self.flist.open(file)
+            if edit:
                 # TODO 由于滚动条存在导致有时候拖拽加载会闪退，增加下面两行可以避免
                 edit.text.tag_add('sel', 'insert', 'insert+1c')
                 edit.text.tag_remove('sel', '1.0', 'end')
