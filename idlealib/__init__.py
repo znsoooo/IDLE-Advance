@@ -108,6 +108,47 @@ else:
     idlelib.CallTips.CallTips = MyCalltip
 
 
+# - Undo Selection ----------------------------------------
+
+
+if PY36:
+    import idlelib.undo
+    from idlelib.undo import InsertCommand, DeleteCommand
+else:
+    import idlelib.UndoDelegator
+    from idlelib.UndoDelegator import InsertCommand, DeleteCommand
+
+
+class MyInsertCommand(InsertCommand):
+    def undo(self, text):
+        super().undo(text)
+        text.tag_remove('sel', '1.0', 'end')
+
+    def redo(self, text):
+        super().redo(text)
+        text.tag_remove('sel', '1.0', 'end')
+        text.tag_add('sel', 'insert-%dc' % len(self.chars), 'insert')
+
+
+class MyDeleteCommand(DeleteCommand):
+    def redo(self, text):
+        super().redo(text)
+        text.tag_remove('sel', '1.0', 'end')
+
+    def undo(self, text):
+        super().undo(text)
+        text.tag_remove('sel', '1.0', 'end')
+        text.tag_add('sel', 'insert-%dc' % len(self.chars), 'insert')
+
+
+if PY36:
+    idlelib.undo.InsertCommand = MyInsertCommand
+    idlelib.undo.DeleteCommand = MyDeleteCommand
+else:
+    idlelib.UndoDelegator.InsertCommand = MyInsertCommand
+    idlelib.UndoDelegator.DeleteCommand = MyDeleteCommand
+
+
 # - AutoComplete ----------------------------------------
 
 
@@ -184,10 +225,13 @@ class MyEditorWindow(EditorWindow):
         self.after_save  = []
         self.before_save = []
         self.before_close = []
+        self.before_paste = []
+        self.after_paste = []
 
         # must before text binding, so before `EditorWindow.__init__()`
         self.cut = wrap_function(self.cut, before=self.before_copy)  # same as `copy`
         self.copy = wrap_function(self.copy, before=self.before_copy)
+        self.paste = wrap_function(self.paste, before=self.before_paste, after=self.after_paste)
         self._close = wrap_function(self._close, before=self.before_close)  # "<<close-window>>"事件不命中点击窗口关闭事件
 
         EditorWindow.__init__(self, *args)
