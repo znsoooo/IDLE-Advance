@@ -5,7 +5,7 @@
 - __Python:__ >= Python 3.4
 - __Author:__ Shixian Li (znsoooo)
 - __Github:__ https://github.com/znsoooo/IDLE-Advance
-- __License:__ MIT License. Copyright (c) 2021-2024 Shixian Li (znsoooo). All rights reserved.
+- __License:__ MIT License. Copyright (c) 2021-2026 Shixian Li (znsoooo). All rights reserved.
 
 
 ## What is it?
